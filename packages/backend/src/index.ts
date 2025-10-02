@@ -2,6 +2,15 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes';
+import rateLimit from 'express-rate-limit'
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+})
+
+app.use('/api/', limiter)
 
 dotenv.config();
 
@@ -36,3 +45,26 @@ app.listen(PORT, () => {
   console.log(`📦 Network: ${process.env.SUI_NETWORK}`);
   console.log(`📝 Package ID: ${process.env.PACKAGE_ID}`);
 });
+
+app.get('/health', async (req: Request, res: Response) => {
+  try {
+    // Check Sui network connectivity
+    const chainId = await suiClient.getChainIdentifier()
+    
+    res.json({ 
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      service: 'SuiNexus API',
+      network: process.env.SUI_NETWORK,
+      packageId: process.env.PACKAGE_ID,
+      chainId,
+      uptime: process.uptime()
+    })
+  } catch (error: any) {
+    res.status(503).json({
+      status: 'ERROR',
+      message: 'Service unavailable',
+      error: error.message
+    })
+  }
+})

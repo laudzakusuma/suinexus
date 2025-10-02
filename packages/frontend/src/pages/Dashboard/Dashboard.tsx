@@ -1,33 +1,65 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useCurrentAccount } from '@mysten/dapp-kit'
+import axios from 'axios'
 import { Package, Users, TrendingUp, Activity, BarChart3 } from 'lucide-react'
 import styles from './Dashboard.module.css'
 import QRCodeGenerator from '../../components/QRCode/QRCodeGenerator'
 import ExportCSV from '../../components/ExportCSV/ExportCSV'
 import AnalyticsChart from '../../components/Analytics/AnalyticsChart'
 import SearchFilter from '../../components/SearchFilter/SearchFilter'
+import { SkeletonCard } from '../../components/Loading/Loading'
+import { useToast } from '../../components/Toast/ToastProvider'
 
 const Dashboard = () => {
   const account = useCurrentAccount()
+  const toast = useToast()
   const [showQR, setShowQR] = useState(false)
+  const [entities, setEntities] = useState<any[]>([])
+  const [assets, setAssets] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (account) {
+      fetchData()
+    }
+  }, [account])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const [entitiesRes, assetsRes] = await Promise.all([
+        axios.get(`/api/entities/owner/${account?.address}`),
+        axios.get(`/api/assets/owner/${account?.address}`)
+      ])
+      
+      setEntities(entitiesRes.data.data || [])
+      setAssets(assetsRes.data.data || [])
+    } catch (error: any) {
+      console.error('Error fetching data:', error)
+      toast.error('Failed to fetch data from blockchain')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const stats = [
-    { label: 'Total Entities', value: '12', change: '+3', icon: Users, color: '#6366f1' },
-    { label: 'Active Assets', value: '48', change: '+12', icon: Package, color: '#8b5cf6' },
-    { label: 'Processes', value: '156', change: '+28', icon: Activity, color: '#ec4899' },
-    { label: 'Growth', value: '32%', change: '+8%', icon: TrendingUp, color: '#10b981' },
+    { label: 'Total Entities', value: entities.length.toString(), change: '+' + entities.length, icon: Users, color: '#6366f1' },
+    { label: 'Active Assets', value: assets.length.toString(), change: '+' + assets.length, icon: Package, color: '#8b5cf6' },
+    { label: 'Processes', value: '0', change: '+0', icon: Activity, color: '#ec4899' },
+    { label: 'Growth', value: '100%', change: '+100%', icon: TrendingUp, color: '#10b981' },
   ]
 
-  const sampleData = [
-    { name: 'Farm Indonesia', location: 'Jakarta', assets: 10, status: 'Active' },
-    { name: 'Mill Bandung', location: 'Bandung', assets: 15, status: 'Active' },
-    { name: 'Distributor A', location: 'Surabaya', assets: 8, status: 'Pending' },
-  ]
+  const exportData = entities.map((entity: any) => ({
+    name: entity.data?.content?.fields?.name || 'Unknown',
+    type: entity.data?.content?.fields?.entity_type || 'Unknown',
+    location: entity.data?.content?.fields?.location || 'Unknown',
+    id: entity.data?.objectId || ''
+  }))
 
   const chartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    values: [10, 25, 18, 35, 28, 42]
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    values: [entities.length > 0 ? 2 : 0, entities.length > 0 ? 5 : 0, 3, assets.length, entities.length + assets.length, entities.length * 2]
   }
 
   const processChartData = {
@@ -109,7 +141,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className={styles.headerActions}>
-            <ExportCSV data={sampleData} filename="entities-report" />
+            <ExportCSV data={exportData} filename="entities-report" />
             <button className={styles.qrButton} onClick={() => setShowQR(!showQR)}>
               <Package size={18} />
               {showQR ? 'Hide QR' : 'Generate QR'}
@@ -194,53 +226,65 @@ const Dashboard = () => {
         >
           <div className={styles.sectionHeader}>
             <Users size={24} />
-            <h2 className={styles.sectionTitle}>Recent Entities</h2>
+            <h2 className={styles.sectionTitle}>Your Entities</h2>
           </div>
           
           <SearchFilter
             onSearch={(query) => console.log('Search:', query)}
             onFilter={(filters) => console.log('Filters:', filters)}
             filterOptions={{
-              status: [
-                { label: 'Active', value: 'active' },
-                { label: 'Pending', value: 'pending' },
-                { label: 'Inactive', value: 'inactive' }
-              ],
-              location: [
-                { label: 'Jakarta', value: 'jakarta' },
-                { label: 'Bandung', value: 'bandung' },
-                { label: 'Surabaya', value: 'surabaya' }
+              type: [
+                { label: 'Farmer', value: 'farmer' },
+                { label: 'Processor', value: 'processor' },
+                { label: 'Distributor', value: 'distributor' },
+                { label: 'Retailer', value: 'retailer' }
               ]
             }}
             placeholder="Search entities..."
           />
 
-          <div className={styles.entitiesList}>
-            {sampleData.map((entity, index) => (
-              <motion.div
-                key={index}
-                className={styles.entityCard}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ x: 5 }}
-              >
-                <div className={styles.entityIcon}>
-                  <Users size={20} />
-                </div>
-                <div className={styles.entityInfo}>
-                  <h3>{entity.name}</h3>
-                  <p>{entity.location}</p>
-                </div>
-                <div className={styles.entityStats}>
-                  <span className={styles.entityAssets}>{entity.assets} assets</span>
-                  <span className={`${styles.entityStatus} ${styles[entity.status.toLowerCase()]}`}>
-                    {entity.status}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className={styles.entitiesList}>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          ) : entities.length === 0 ? (
+            <div className={styles.emptyState}>
+              <Users size={48} color="rgba(255,255,255,0.3)" />
+              <p>No entities found. Create your first entity!</p>
+            </div>
+          ) : (
+            <div className={styles.entitiesList}>
+              {entities.map((entity: any, index: number) => {
+                const fields = entity.data?.content?.fields || {}
+                return (
+                  <motion.div
+                    key={entity.data?.objectId || index}
+                    className={styles.entityCard}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ x: 5 }}
+                  >
+                    <div className={styles.entityIcon}>
+                      <Users size={20} />
+                    </div>
+                    <div className={styles.entityInfo}>
+                      <h3>{fields.name || 'Unknown Entity'}</h3>
+                      <p>{fields.location || 'Unknown Location'}</p>
+                    </div>
+                    <div className={styles.entityStats}>
+                      <span className={styles.entityType}>{fields.entity_type || 'Unknown'}</span>
+                      <span className={`${styles.entityStatus} ${styles.active}`}>
+                        Active
+                      </span>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
         </motion.div>
 
         <motion.div

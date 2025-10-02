@@ -314,10 +314,33 @@
   font-size: 0.9rem;
 }
 
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.emptyState p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.entityType {
+  padding: 0.4rem 0.8rem;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #818cf8;
+  text-transform: capitalize;
+}
+
 .entityStats {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .entityAssets {

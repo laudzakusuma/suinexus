@@ -1,0 +1,28 @@
+# General / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE Folders
+.idea/
+.vscode/
+
+# Node / PNPM
+node_modules/
+
+# SUI Move Contracts (packages/contracts)
+packages/contracts/build/
+
+# Backend (packages/backend)
+packages/backend/dist/
+
+# Frontend (packages/frontend)
+packages/frontend/dist/
+packages/frontend/.vite/
+packages/frontend/coverage/
+
+# Secrets & Environment Variables
+# Abaikan semua file .env kecuali .env.example
+.env
+.env.*
+!.env.example

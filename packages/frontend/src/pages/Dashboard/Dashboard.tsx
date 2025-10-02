@@ -10,6 +10,7 @@ import AnalyticsChart from '../../components/Analytics/AnalyticsChart'
 import SearchFilter from '../../components/SearchFilter/SearchFilter'
 import { SkeletonCard } from '../../components/Loading/Loading'
 import { useToast } from '../../components/Toast/ToastProvider'
+import AnimatedNumber from '../../components/AnimatedNumber/AnimatedNumber'
 
 const Dashboard = () => {
   const account = useCurrentAccount()
@@ -44,10 +45,39 @@ const Dashboard = () => {
   }
 
   const stats = [
-    { label: 'Total Entities', value: entities.length.toString(), change: '+' + entities.length, icon: Users, color: '#6366f1' },
-    { label: 'Active Assets', value: assets.length.toString(), change: '+' + assets.length, icon: Package, color: '#8b5cf6' },
-    { label: 'Processes', value: '0', change: '+0', icon: Activity, color: '#ec4899' },
-    { label: 'Growth', value: '100%', change: '+100%', icon: TrendingUp, color: '#10b981' },
+    { 
+      label: 'Total Entities', 
+      value: entities.length, 
+      change: entities.length, 
+      changeLabel: 'New',
+      icon: Users, 
+      color: '#6366f1' 
+    },
+    { 
+      label: 'Active Assets', 
+      value: assets.length, 
+      change: assets.length, 
+      changeLabel: 'Created',
+      icon: Package, 
+      color: '#8b5cf6' 
+    },
+    { 
+      label: 'Total Processes', 
+      value: 0, 
+      change: 0, 
+      changeLabel: 'Applied',
+      icon: Activity, 
+      color: '#ec4899' 
+    },
+    { 
+      label: 'Growth Rate', 
+      value: 100, 
+      change: 100,
+      changeLabel: 'Increase',
+      icon: TrendingUp, 
+      color: '#10b981',
+      isPercentage: true 
+    },
   ]
 
   const exportData = entities.map((entity: any) => ({
@@ -184,8 +214,26 @@ const Dashboard = () => {
                 <div className={styles.statContent}>
                   <p className={styles.statLabel}>{stat.label}</p>
                   <div className={styles.statValueRow}>
-                    <h2 className={styles.statValue}>{stat.value}</h2>
-                    <span className={styles.statChange}>{stat.change}</span>
+                    <h2 className={styles.statValue}>
+                      <AnimatedNumber 
+                        value={stat.value}
+                        duration={2000}
+                        suffix={stat.isPercentage ? '%' : ''}
+                        enableGlow={false}
+                      />
+                    </h2>
+                    <motion.span 
+                      className={styles.statChange}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + (index * 0.1) }}
+                    >
+                      +<AnimatedNumber 
+                        value={stat.change}
+                        duration={2000}
+                        suffix={stat.isPercentage ? '%' : ''}
+                      /> {stat.changeLabel}
+                    </motion.span>
                   </div>
                 </div>
                 <div className={styles.statGlow} style={{ background: `radial-gradient(circle, ${stat.color}40, transparent)` }} />

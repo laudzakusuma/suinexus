@@ -63,7 +63,7 @@ module suinexus::nexus {
 
     // --- Entry Functions ---
 
-    public entry fun create_entity(
+    public fun create_entity(
         entity_type: vector<u8>, name: vector<u8>, location: vector<u8>, ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -77,7 +77,7 @@ module suinexus::nexus {
         }, sender);
     }
 
-    public entry fun create_harvest_batch(
+    public fun create_harvest_batch(
         name: vector<u8>, description: vector<u8>, quantity: u64, unit: vector<u8>, clock: &Clock, ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -98,9 +98,8 @@ module suinexus::nexus {
         transfer::public_transfer(asset, sender);
     }
 
-    public entry fun transfer_asset_and_create_invoice(
-        // DEFINITIVE FIX: Parameter declared as 'mut' to allow modification
-        mut asset: DynamicAssetNFT,
+    public fun transfer_asset_and_create_invoice(
+        asset: DynamicAssetNFT,
         issuer_entity: &EntityObject,
         recipient_addr: address,
         invoice_amount: u64,
@@ -128,8 +127,7 @@ module suinexus::nexus {
         });
         transfer::public_transfer(invoice, sender);
 
-        // DEFINITIVE FIX: The invalid "let mut asset = asset;" line is removed.
-        let mut history_log = string::utf8(b"TRANSFERRED to ");
+        let history_log = string::utf8(b"TRANSFERRED to ");
         string::append(&mut history_log, issuer_entity.name);
         vector::push_back(&mut asset.history, history_log);
         asset.owner = recipient_addr;
@@ -138,7 +136,7 @@ module suinexus::nexus {
         transfer::public_transfer(asset, recipient_addr);
     }
 
-    public entry fun apply_process(
+    public fun apply_process(
         asset: &mut DynamicAssetNFT,
         processor_entity: &EntityObject,
         process_name: vector<u8>,
@@ -162,7 +160,7 @@ module suinexus::nexus {
             notes: string::utf8(notes),
         };
 
-        let mut history_log = string::utf8(b"PROCESSED: ");
+        let history_log = string::utf8(b"PROCESSED: ");
         string::append(&mut history_log, process.process_name);
         string::append(&mut history_log, string::utf8(b" by "));
         string::append(&mut history_log, processor_entity.name);

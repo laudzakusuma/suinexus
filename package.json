@@ -2,8 +2,8 @@
   "name": "suinexus-monorepo",
   "private": true,
   "scripts": {
-    "dev:backend": "pnpm --filter backend dev",
-    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "npm --prefix packages/backend run dev",
+    "dev:frontend": "npm --prefix packages/frontend run dev",
     "build:contracts": "pnpm --filter contracts build"
   },
   "devDependencies": {

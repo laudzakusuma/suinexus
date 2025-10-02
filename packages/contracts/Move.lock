@@ -19,3 +19,16 @@ source = { git = "https://github.com/MystenLabs/sui.git", rev = "devnet", subdir
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
 ]
+
+[move.toolchain-version]
+compiler-version = "1.57.2"
+edition = "2024"
+flavor = "sui"
+
+[env]
+
+[env.suinexus]
+chain-id = "bc718b80"
+original-published-id = "0x67a94406c0c1c38473ed22ea9a76f40f6ccc00e9736b4e4de351411cc05de398"
+latest-published-id = "0x67a94406c0c1c38473ed22ea9a76f40f6ccc00e9736b4e4de351411cc05de398"
+published-version = "1"

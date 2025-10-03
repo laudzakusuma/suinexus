@@ -4,14 +4,18 @@
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
+/* Header */
 .header {
-  text-align: center;
-  margin-bottom: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
 }
 
 .title {
@@ -26,75 +30,135 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-.searchBox {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-}
-
-.searchInput {
-  flex: 1;
-  padding: 1rem 1.5rem;
+.refreshButton {
+  padding: 0.875rem 1.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: #6366f1;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.searchButton {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.searchButton:hover {
+.refreshButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Search Container */
+.searchContainer {
+  margin-bottom: 2rem;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.searchBar:focus-within {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.searchIcon {
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.qrButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.qrButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
 }
 
+/* Assets List */
 .assetsList {
-  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.sectionTitle {
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.listTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 1.5rem;
   font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
 }
 
+.listCount {
+  padding: 0.5rem 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #818cf8;
+  font-weight: 600;
+}
+
+/* Asset Card */
 .assetCard {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 2rem;
+  padding: 1.5rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   backdrop-filter: blur(20px);
+  cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 1rem;
 }
 
 .assetCard:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(99, 102, 241, 0.3);
   background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
 }
 
 .assetIcon {
@@ -106,26 +170,64 @@
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1));
   border-radius: 15px;
   color: #6366f1;
+  flex-shrink: 0;
 }
 
-.assetInfo {
+.assetContent {
   flex: 1;
+  min-width: 0;
+}
+
+.assetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .assetName {
   font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
 }
+
+.statusBadge {
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.statusBadge.harvested { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.statusBadge.cleaned { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+.statusBadge.milled { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+.statusBadge.packaged { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.statusBadge.shipped { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+.statusBadge.delivered { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.statusBadge.unknown { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
 .assetDescription {
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.75rem;
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  box-orient: vertical;
 }
 
 .assetMeta {
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .metaItem {
@@ -136,122 +238,75 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-.assetStatus {
+.assetArrow {
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.assetCard:hover .assetArrow {
+  color: #6366f1;
+  transform: translateX(5px);
+}
+
+/* Empty States */
+.emptyCard,
+.emptyState {
   display: flex;
+  flex-direction: column;
   align-items: center;
-}
-
-.statusBadge {
-  padding: 0.5rem 1rem;
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 8px;
-  color: #10b981;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.card {
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 6rem 2rem;
+  text-align: center;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  padding: 3rem;
-  text-align: center;
   backdrop-filter: blur(20px);
 }
 
-.emptyState {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: rgba(255, 255, 255, 0.5);
+.emptyCard h2,
+.emptyState h3 {
+  font-size: 2rem;
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
+.emptyCard p,
 .emptyState p {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-}
-
-.listTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.assetCard {
-  cursor: pointer;
-}
-
-.modalContent {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.detailSection h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #6366f1;
-}
-
-.detailGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.detailGrid label {
-  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.25rem;
-  display: block;
+  font-size: 1.1rem;
+  margin: 0;
 }
 
-.detailGrid p {
-  font-size: 1rem;
-  color: white;
-  font-weight: 600;
-}
-
-.historyList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.historyItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-}
-
-.historyDot {
-  width: 12px;
-  height: 12px;
-  background: #6366f1;
-  border-radius: 50%;
-  margin-top: 0.25rem;
-  flex-shrink: 0;
-}
-
-.objectId {
-  font-family: 'Monaco', 'Courier New', monospace;
-  font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 8px;
-  word-break: break-all;
-  color: #818cf8;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .detailGrid {
-    grid-template-columns: 1fr;
+  .header {
+    flex-direction: column;
+  }
+  
+  .searchBar {
+    flex-direction: row;
+  }
+  
+  .assetCard {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .assetHeader {
+    flex-direction: column;
+  }
+  
+  .assetMeta {
+    justify-content: center;
+  }
+  
+  .assetArrow {
+    transform: rotate(90deg);
+  }
+  
+  .assetCard:hover .assetArrow {
+    transform: rotate(90deg) translateX(5px);
   }
 }

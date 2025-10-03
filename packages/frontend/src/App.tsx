@@ -8,6 +8,7 @@ import CreateHarvest from './pages/CreateHarvest/CreateHarvest'
 import TransferAsset from './pages/TransferAsset/TransferAsset'
 import ApplyProcess from './pages/ApplyProcess/ApplyProcess'
 import AssetTracking from './pages/AssetTracking/AssetTracking'
+import Analytics from './pages/Analytics/Analytics'
 import styles from './App.module.css'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/transfer" element={<TransferAsset />} />
             <Route path="/process" element={<ApplyProcess />} />
             <Route path="/tracking" element={<AssetTracking />} />
+            <Route path="/analytics" element={<Analytics />} />
           </Routes>
         </AnimatePresence>
       </main>

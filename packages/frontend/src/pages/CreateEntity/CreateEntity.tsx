@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
-import axios from 'axios'
 import { Sparkles } from 'lucide-react'
+import NotificationService from '../../services/notificationService' 
 import styles from './CreateEntity.module.css'
 import { useToast } from '../../components/Toast/ToastProvider'
 import { Spinner } from '../../components/Loading/Loading'
@@ -38,32 +38,44 @@ const CreateEntity = () => {
     try {
       toast.info('Building transaction...')
       
-      const response = await axios.post('/api/entities/build-transaction', {
-        ...formData,
-        signer: account.address
+      const tx = new Transaction()
+      
+      tx.moveCall({
+        target: `${import.meta.env.VITE_PACKAGE_ID}::${import.meta.env.VITE_MODULE_NAME || 'nexus'}::create_entity`,
+        arguments: [
+          tx.pure.string(formData.entity_type),
+          tx.pure.string(formData.name),
+          tx.pure.string(formData.location)
+        ]
       })
-
-      const txBytes = response.data.data.txBytes
-      const bytes = new Uint8Array(Buffer.from(txBytes, 'base64'))
       
       toast.info('Please sign the transaction in your wallet...')
       
-      signAndExecute({
-        transaction: Transaction.from(bytes)
-      }, {
-        onSuccess: (result) => {
-          toast.success(`Entity created successfully! TX: ${result.digest.slice(0, 8)}...`)
-          setFormData({ entity_type: 'farmer', name: '', location: '' })
-          setLoading(false)
+      signAndExecute(
+        {
+          transaction: tx as any,
         },
-        onError: (error) => {
-          toast.error(`Transaction failed: ${error.message}`)
-          setLoading(false)
+        {
+          onSuccess: (result) => {
+            toast.success(`Entity created successfully! TX: ${result.digest.slice(0, 8)}...`)
+            
+            NotificationService.notifyEntityCreated(
+              formData.name,
+              formData.entity_type
+            )
+            
+            setFormData({ entity_type: 'farmer', name: '', location: '' })
+            setLoading(false)
+          },
+          onError: (error) => {
+            toast.error(`Transaction failed: ${error.message}`)
+            setLoading(false)
+          }
         }
-      })
+      )
     } catch (error: any) {
       console.error('Error:', error)
-      toast.error(error.response?.data?.error || 'Failed to create entity')
+      toast.error(error.message || 'Failed to create entity')
       setLoading(false)
     }
   }

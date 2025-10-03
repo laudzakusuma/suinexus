@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
-import { Transaction } from '@mysten/sui/transactions'
-import axios from 'axios'
+import { Transaction } from '@mysten/sui/transactions' // ⬅️ CORRECT IMPORT
 import { Package } from 'lucide-react'
+import NotificationService from '../../services/notificationService' // ⬅️ ADD
 import styles from './CreateHarvest.module.css'
 import { useToast } from '../../components/Toast/ToastProvider'
 import { Spinner } from '../../components/Loading/Loading'
@@ -44,33 +44,46 @@ const CreateHarvest = () => {
     try {
       toast.info('Building transaction...')
       
-      const response = await axios.post('/api/assets/harvest/build-transaction', {
-        ...formData,
-        quantity: Number(formData.quantity),
-        signer: account.address
+      const tx = new Transaction()
+      
+      tx.moveCall({
+        target: `${import.meta.env.VITE_PACKAGE_ID}::${import.meta.env.VITE_MODULE_NAME || 'nexus'}::create_harvest_batch`,
+        arguments: [
+          tx.pure.string(formData.name),
+          tx.pure.string(formData.description),
+          tx.pure.u64(Number(formData.quantity)),
+          tx.pure.string(formData.unit),
+          tx.object('0x6')
+        ]
       })
-
-      const txBytes = response.data.data.txBytes
-      const bytes = new Uint8Array(Buffer.from(txBytes, 'base64'))
       
       toast.info('Please sign the transaction in your wallet...')
       
-      signAndExecute({
-        transaction: Transaction.from(bytes)
-      }, {
-        onSuccess: (result) => {
-          toast.success(`Harvest batch created! TX: ${result.digest.slice(0, 8)}...`)
-          setFormData({ name: '', description: '', quantity: '', unit: 'kg' })
-          setLoading(false)
+      signAndExecute(
+        {
+          transaction: tx as any,
         },
-        onError: (error) => {
-          toast.error(`Transaction failed: ${error.message}`)
-          setLoading(false)
+        {
+          onSuccess: (result) => {
+            toast.success(`Harvest batch created! TX: ${result.digest.slice(0, 8)}...`)
+            
+            NotificationService.notifyAssetCreated(
+              formData.name,
+              result.digest
+            )
+            
+            setFormData({ name: '', description: '', quantity: '', unit: 'kg' })
+            setLoading(false)
+          },
+          onError: (error) => {
+            toast.error(`Transaction failed: ${error.message}`)
+            setLoading(false)
+          }
         }
-      })
+      )
     } catch (error: any) {
       console.error('Error:', error)
-      toast.error(error.response?.data?.error || 'Failed to create harvest batch')
+      toast.error(error.message || 'Failed to create harvest batch')
       setLoading(false)
     }
   }

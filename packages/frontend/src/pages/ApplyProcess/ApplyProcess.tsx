@@ -4,6 +4,7 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-ki
 import { Transaction } from '@mysten/sui/transactions'
 import axios from 'axios'
 import { Workflow } from 'lucide-react'
+import NotificationService from '../../services/notificationService'
 import styles from './ApplyProcess.module.css'
 import { useToast } from '../../components/Toast/ToastProvider'
 import { Spinner } from '../../components/Loading/Loading'
@@ -51,28 +52,39 @@ const ApplyProcess = () => {
 
       const txBytes = response.data.data.txBytes
       const bytes = new Uint8Array(Buffer.from(txBytes, 'base64'))
+      const tx = Transaction.from(bytes) // ⬅️ Store transaction first
       
       toast.info('Please sign the transaction in your wallet...')
       
-      signAndExecute({
-        transaction: Transaction.from(bytes)
-      }, {
-        onSuccess: (result) => {
-          toast.success(`Process applied! TX: ${result.digest.slice(0, 8)}...`)
-          setFormData({
-            asset_id: '',
-            processor_entity_id: '',
-            process_name: '',
-            new_state: '',
-            notes: ''
-          })
-          setLoading(false)
+      // ⬅️ FIX: Pass using 'transaction' property
+      signAndExecute(
+        {
+          transaction: tx as any, // Cast to any to bypass type checking
         },
-        onError: (error) => {
-          toast.error(`Transaction failed: ${error.message}`)
-          setLoading(false)
+        {
+          onSuccess: (result) => {
+            toast.success(`Process applied! TX: ${result.digest.slice(0, 8)}...`)
+            
+            NotificationService.notifyProcessApplied(
+              formData.asset_id.slice(0, 8) + '...',
+              formData.process_name
+            )
+            
+            setFormData({
+              asset_id: '',
+              processor_entity_id: '',
+              process_name: '',
+              new_state: '',
+              notes: ''
+            })
+            setLoading(false)
+          },
+          onError: (error) => {
+            toast.error(`Transaction failed: ${error.message}`)
+            setLoading(false)
+          }
         }
-      })
+      )
     } catch (error: any) {
       console.error('Error:', error)
       toast.error(error.response?.data?.error || 'Failed to apply process')

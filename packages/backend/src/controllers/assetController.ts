@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { TransactionBlock } from '@mysten/sui/transactions';
+import { Transaction } from '@mysten/sui/transactions';
 import { suiClient, CONTRACT_CONFIG } from '../config/sui';
 import { CreateHarvestRequest, TransferAssetRequest, ApplyProcessRequest } from '../types';
 
@@ -78,15 +78,15 @@ export async function buildCreateHarvestTransaction(req: Request, res: Response)
       });
     }
 
-    const tx = new TransactionBlock();
+    const tx = new Transaction();
     
     tx.moveCall({
       target: `${CONTRACT_CONFIG.packageId}::${CONTRACT_CONFIG.moduleName}::create_harvest_batch`,
       arguments: [
-        tx.pure(Array.from(new TextEncoder().encode(name))),
-        tx.pure(Array.from(new TextEncoder().encode(description))),
-        tx.pure(quantity),
-        tx.pure(Array.from(new TextEncoder().encode(unit))),
+        tx.pure.string(name),
+        tx.pure.string(description),
+        tx.pure.u64(quantity),
+        tx.pure.string(unit),
         tx.object('0x6')
       ]
     });
@@ -126,16 +126,16 @@ export async function buildTransferAssetTransaction(req: Request, res: Response)
       });
     }
 
-    const tx = new TransactionBlock();
+    const tx = new Transaction();
     
     tx.moveCall({
       target: `${CONTRACT_CONFIG.packageId}::${CONTRACT_CONFIG.moduleName}::transfer_asset_and_create_invoice`,
       arguments: [
         tx.object(asset_id),
         tx.object(issuer_entity_id),
-        tx.pure(recipient_address),
-        tx.pure(invoice_amount),
-        tx.pure(invoice_due_date_ms)
+        tx.pure.address(recipient_address),
+        tx.pure.u64(invoice_amount),
+        tx.pure.u64(invoice_due_date_ms)
       ]
     });
 
@@ -174,16 +174,16 @@ export async function buildApplyProcessTransaction(req: Request, res: Response) 
       });
     }
 
-    const tx = new TransactionBlock();
+    const tx = new Transaction();
     
     tx.moveCall({
       target: `${CONTRACT_CONFIG.packageId}::${CONTRACT_CONFIG.moduleName}::apply_process`,
       arguments: [
         tx.object(asset_id),
         tx.object(processor_entity_id),
-        tx.pure(Array.from(new TextEncoder().encode(process_name))),
-        tx.pure(Array.from(new TextEncoder().encode(new_state))),
-        tx.pure(Array.from(new TextEncoder().encode(notes))),
+        tx.pure.string(process_name),
+        tx.pure.string(new_state),
+        tx.pure.string(notes),
         tx.object('0x6')
       ]
     });

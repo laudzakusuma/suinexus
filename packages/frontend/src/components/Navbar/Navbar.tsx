@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit'
 import { motion } from 'framer-motion'
-import { Home, Package, Plus, Send, Workflow, Search } from 'lucide-react'
+import { Home, Package, Plus, Send, Workflow, Search, BarChart3 } from 'lucide-react'
+import NotificationCenter from '../NotificationCenter/NotificationCenter'
 import styles from './Navbar.module.css'
 
 const Navbar = () => {
@@ -15,6 +16,7 @@ const Navbar = () => {
     { path: '/transfer', label: 'Transfer', icon: Send },
     { path: '/process', label: 'Process', icon: Workflow },
     { path: '/tracking', label: 'Tracking', icon: Search },
+    { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   ]
 
   return (
@@ -59,6 +61,7 @@ const Navbar = () => {
         </div>
 
         <div className={styles.walletSection}>
+          <NotificationCenter />
           {account && (
             <div className={styles.accountInfo}>
               <div className={styles.statusDot} />

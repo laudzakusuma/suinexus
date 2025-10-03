@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { TransactionBlock } from '@mysten/sui/transactions';
+import { Transaction } from '@mysten/sui/transactions';
 import { suiClient, CONTRACT_CONFIG } from '../config/sui';
 import { CreateEntityRequest } from '../types';
 
@@ -78,14 +78,14 @@ export async function buildCreateEntityTransaction(req: Request, res: Response) 
       });
     }
 
-    const tx = new TransactionBlock();
+    const tx = new Transaction();
     
     tx.moveCall({
       target: `${CONTRACT_CONFIG.packageId}::${CONTRACT_CONFIG.moduleName}::create_entity`,
       arguments: [
-        tx.pure(Array.from(new TextEncoder().encode(entity_type))),
-        tx.pure(Array.from(new TextEncoder().encode(name))),
-        tx.pure(Array.from(new TextEncoder().encode(location)))
+        tx.pure.string(entity_type),
+        tx.pure.string(name),
+        tx.pure.string(location)
       ]
     });
 

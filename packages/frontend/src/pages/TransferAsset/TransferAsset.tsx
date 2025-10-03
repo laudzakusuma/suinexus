@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
-import { Transaction } from '@mysten/sui/transactions'
-import axios from 'axios'
+import { Transaction } from '@mysten/sui/transactions' // ⬅️ CORRECT IMPORT
 import { Send } from 'lucide-react'
+import NotificationService from '../../services/notificationService' // ⬅️ ADD
 import styles from './TransferAsset.module.css'
 import { useToast } from '../../components/Toast/ToastProvider'
 import { Spinner } from '../../components/Loading/Loading'
@@ -47,44 +47,57 @@ const TransferAsset = () => {
       
       const dueDateMs = formData.invoice_due_date_ms 
         ? new Date(formData.invoice_due_date_ms).getTime()
-        : Date.now() + 30 * 24 * 60 * 60 * 1000 // Default 30 days
+        : Date.now() + 30 * 24 * 60 * 60 * 1000
       
-      const response = await axios.post('/api/assets/transfer/build-transaction', {
-        asset_id: formData.asset_id,
-        issuer_entity_id: formData.issuer_entity_id,
-        recipient_address: formData.recipient_address,
-        invoice_amount: Number(formData.invoice_amount),
-        invoice_due_date_ms: dueDateMs,
-        signer: account.address
+      const tx = new Transaction()
+      
+      tx.moveCall({
+        target: `${import.meta.env.VITE_PACKAGE_ID}::${import.meta.env.VITE_MODULE_NAME || 'nexus'}::transfer_asset_and_create_invoice`,
+        arguments: [
+          tx.object(formData.asset_id),
+          tx.object(formData.issuer_entity_id),
+          tx.pure.address(formData.recipient_address),
+          tx.pure.u64(Number(formData.invoice_amount)),
+          tx.pure.u64(dueDateMs)
+        ]
       })
-
-      const txBytes = response.data.data.txBytes
-      const bytes = new Uint8Array(Buffer.from(txBytes, 'base64'))
       
       toast.info('Please sign the transaction in your wallet...')
       
-      signAndExecute({
-        transaction: Transaction.from(bytes)
-      }, {
-        onSuccess: (result) => {
-          toast.success(`Asset transferred! TX: ${result.digest.slice(0, 8)}...`)
-          setFormData({
-            asset_id: '',
-            issuer_entity_id: '',
-            recipient_address: '',
-            invoice_amount: '',
-            invoice_due_date_ms: ''
-          })
-          setLoading(false)
+      signAndExecute(
+        {
+          transaction: tx as any,
         },
-        onError: (error) => {
-          toast.error(`Transaction failed: ${error.message}`)
-          setLoading(false)
+        {
+          onSuccess: (result) => {
+            toast.success(`Asset transferred! TX: ${result.digest.slice(0, 8)}...`)
+            
+            NotificationService.notifyAssetTransferred(
+              'Asset',
+              formData.recipient_address.slice(0, 8) + '...'
+            )
+            NotificationService.notifyInvoiceCreated(
+              Number(formData.invoice_amount)
+            )
+            
+            setFormData({
+              asset_id: '',
+              issuer_entity_id: '',
+              recipient_address: '',
+              invoice_amount: '',
+              invoice_due_date_ms: ''
+            })
+            setLoading(false)
+          },
+          onError: (error) => {
+            toast.error(`Transaction failed: ${error.message}`)
+            setLoading(false)
+          }
         }
-      })
+      )
     } catch (error: any) {
       console.error('Error:', error)
-      toast.error(error.response?.data?.error || 'Failed to transfer asset')
+      toast.error(error.message || 'Failed to transfer asset')
       setLoading(false)
     }
   }

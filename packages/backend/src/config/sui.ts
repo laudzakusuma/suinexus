@@ -1,5 +1,5 @@
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
-import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
 const network = process.env.SUI_NETWORK || 'devnet';
 const rpcUrl = getFullnodeUrl(network as 'devnet' | 'testnet' | 'mainnet');

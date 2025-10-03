@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
+import { TransactionBlock } from '@mysten/sui/transactions';
 import { suiClient, CONTRACT_CONFIG } from '../config/sui';
 import { CreateHarvestRequest, TransferAssetRequest, ApplyProcessRequest } from '../types';
 

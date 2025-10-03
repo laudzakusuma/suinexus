@@ -1,0 +1,183 @@
+.timeline {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.timelineLine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.timelineDot {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(10, 10, 15, 1);
+  flex-shrink: 0;
+}
+
+.timelineConnector {
+  flex: 1;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 0;
+  min-height: 40px;
+}
+
+.timelineContent {
+  flex: 1;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.timelineTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
+  color: white;
+}
+
+.timelineDate {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+.timelineDescription {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.timelineLocation,
+.timelineActor {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.timelineMetadata {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metadataItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.timelineFiles {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filesHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.75rem;
+}
+
+.filesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.75rem;
+}
+
+.fileThumb {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.fileThumb:hover {
+  transform: scale(1.05);
+}
+
+.fileThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fileIcon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.empty p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .timelineHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .timelineMetadata {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

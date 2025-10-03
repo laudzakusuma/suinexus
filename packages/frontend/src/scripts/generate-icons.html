@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuiNexus Icon Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0f;
+      color: white;
+    }
+    canvas {
+      border: 1px solid #333;
+      margin: 20px 0;
+      background: white;
+    }
+    button {
+      padding: 10px 20px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #4f46e5;
+    }
+    .preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .preview img {
+      width: 100%;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>SuiNexus Icon Generator</h1>
+  <canvas id="canvas"></canvas>
+  <div>
+    <button onclick="generateAllIcons()">Generate All Icons</button>
+    <button onclick="downloadAllIcons()">Download All</button>
+  </div>
+  <div class="preview" id="preview"></div>
+
+  <script>
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+    const icons = {};
+
+    function generateIcon(size) {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = size;
+      canvas.height = size;
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#6366f1');
+      gradient.addColorStop(1, '#8b5cf6');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      // Draw logo/icon
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.4}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SN', size / 2, size / 2);
+
+      // Add subtle border
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = size * 0.02;
+      ctx.strokeRect(0, 0, size, size);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    function generateAllIcons() {
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '';
+
+      sizes.forEach(size => {
+        const dataUrl = generateIcon(size);
+        icons[size] = dataUrl;
+
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.title = `${size}x${size}`;
+        
+        const div = document.createElement('div');
+        div.innerHTML = `<p>${size}x${size}</p>`;
+        div.appendChild(img);
+        preview.appendChild(div);
+      });
+
+      alert('All icons generated! Click "Download All" to save them.');
+    }
+
+    function downloadAllIcons() {
+      sizes.forEach(size => {
+        if (icons[size]) {
+          const link = document.createElement('a');
+          link.download = `icon-${size}x${size}.png`;
+          link.href = icons[size];
+          link.click();
+        }
+      });
+    }
+
+    // Auto-generate on load
+    window.onload = generateAllIcons;
+  </script>
+</body>
+</html>

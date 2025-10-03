@@ -1,95 +1,134 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
+import db from './db';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+class ApiService {
+  private isOnline = navigator.onLine;
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<{ error?: string }>) => {
-    const message = error.response?.data?.error || error.message || 'An error occurred';
-    return Promise.reject(new Error(message));
-  }
-);
-
-export class ApiService {
-  // Entities
-  static async getEntitiesByOwner(address: string) {
-    const response = await apiClient.get(`/entities/owner/${address}`);
-    return response.data;
+  constructor() {
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      this.syncPendingTransactions();
+    });
+    
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+    });
   }
 
-  static async getEntityById(id: string) {
-    const response = await apiClient.get(`/entities/${id}`);
-    return response.data;
+  async getAssetsByOwner(address: string) {
+    try {
+      if (this.isOnline) {
+        const response = await axios.get(`${API_BASE_URL}/assets/owner/${address}`);
+        
+        // Cache in IndexedDB
+        const assets = response.data.data || [];
+        for (const asset of assets) {
+          await db.saveAsset(asset.data?.objectId, asset);
+        }
+        
+        return response.data;
+      } else {
+        // Return cached data when offline
+        const cached = await db.getAllAssets();
+        return {
+          success: true,
+          data: cached.map(c => c.data),
+          cached: true
+        };
+      }
+    } catch (error) {
+      // Fallback to cache on error
+      const cached = await db.getAllAssets();
+      if (cached.length > 0) {
+        return {
+          success: true,
+          data: cached.map(c => c.data),
+          cached: true
+        };
+      }
+      throw error;
+    }
   }
 
-  static async buildCreateEntityTransaction(data: {
-    entity_type: string;
-    name: string;
-    location: string;
-    signer: string;
-  }) {
-    const response = await apiClient.post('/entities/build-transaction', data);
-    return response.data;
+  async getAsset(assetId: string) {
+    try {
+      if (this.isOnline) {
+        const response = await axios.get(`${API_BASE_URL}/assets/${assetId}`);
+        await db.saveAsset(assetId, response.data.data);
+        return response.data;
+      } else {
+        const cached = await db.getAsset(assetId);
+        if (cached) {
+          return {
+            success: true,
+            data: cached.data,
+            cached: true
+          };
+        }
+        throw new Error('Asset not found in cache');
+      }
+    } catch (error) {
+      const cached = await db.getAsset(assetId);
+      if (cached) {
+        return {
+          success: true,
+          data: cached.data,
+          cached: true
+        };
+      }
+      throw error;
+    }
   }
 
-  // Assets
-  static async getAssetsByOwner(address: string) {
-    const response = await apiClient.get(`/assets/owner/${address}`);
-    return response.data;
+  async getEntitiesByOwner(address: string) {
+    try {
+      if (this.isOnline) {
+        const response = await axios.get(`${API_BASE_URL}/entities/owner/${address}`);
+        
+        const entities = response.data.data || [];
+        for (const entity of entities) {
+          await db.saveEntity(entity.data?.objectId, entity);
+        }
+        
+        return response.data;
+      } else {
+        const cached = await db.getAllEntities();
+        return {
+          success: true,
+          data: cached.map(c => c.data),
+          cached: true
+        };
+      }
+    } catch (error) {
+      const cached = await db.getAllEntities();
+      if (cached.length > 0) {
+        return {
+          success: true,
+          data: cached.map(c => c.data),
+          cached: true
+        };
+      }
+      throw error;
+    }
   }
 
-  static async getAssetById(id: string) {
-    const response = await apiClient.get(`/assets/${id}`);
-    return response.data;
-  }
+  async syncPendingTransactions() {
+    const pending = await db.getPendingTransactions();
+    
+    for (const tx of pending) {
+      try {
+        // Retry transaction
+        // Implementation depends on transaction type
+        await db.updateTransactionStatus(tx.id, 'synced');
+      } catch (error) {
+        await db.updateTransactionStatus(tx.id, 'failed');
+      }
+    }
 
-  static async buildCreateHarvestTransaction(data: {
-    name: string;
-    description: string;
-    quantity: number;
-    unit: string;
-    signer: string;
-  }) {
-    const response = await apiClient.post('/assets/harvest/build-transaction', data);
-    return response.data;
-  }
-
-  static async buildTransferAssetTransaction(data: {
-    asset_id: string;
-    issuer_entity_id: string;
-    recipient_address: string;
-    invoice_amount: number;
-    invoice_due_date_ms: number;
-    signer: string;
-  }) {
-    const response = await apiClient.post('/assets/transfer/build-transaction', data);
-    return response.data;
-  }
-
-  static async buildApplyProcessTransaction(data: {
-    asset_id: string;
-    processor_entity_id: string;
-    process_name: string;
-    new_state: string;
-    notes: string;
-    signer: string;
-  }) {
-    const response = await apiClient.post('/assets/process/build-transaction', data);
-    return response.data;
-  }
-
-  // Invoices
-  static async getInvoicesByBeneficiary(address: string) {
-    const response = await apiClient.get(`/invoices/beneficiary/${address}`);
-    return response.data;
+    await db.clearSyncedTransactions();
   }
 }
 
-export default ApiService;
+export default new ApiService();

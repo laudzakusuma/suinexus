@@ -1,0 +1,1 @@
+console.log('Generate PWA icons at: https://realfavicongenerator.net/');

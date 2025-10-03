@@ -10,6 +10,8 @@ import ApplyProcess from './pages/ApplyProcess/ApplyProcess'
 import AssetDetail from './pages/AssetDetail/AssetDetail'
 import AssetTracking from './pages/AssetTracking/AssetTracking'
 import Analytics from './pages/Analytics/Analytics'
+import PWAInstallBanner from './components/PWAInstallBanner/PWAInstallBanner'
+import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator'
 import styles from './App.module.css'
 
 function App() {
@@ -34,6 +36,10 @@ function App() {
           </Routes>
         </AnimatePresence>
       </main>
+
+      {/* PWA Features */}
+      <PWAInstallBanner />
+      <OfflineIndicator />
     </div>
   )
 }

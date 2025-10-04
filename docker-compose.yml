@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    container_name: suinexus-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - SUI_NETWORK=${SUI_NETWORK:-devnet}
+      - PACKAGE_ID=${PACKAGE_ID}
+      - MODULE_NAME=${MODULE_NAME:-nexus}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      - backend-data:/app/data
+    networks:
+      - suinexus-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3001/api}
+        - VITE_PACKAGE_ID=${PACKAGE_ID}
+        - VITE_MODULE_NAME=${MODULE_NAME:-nexus}
+    container_name: suinexus-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - suinexus-network
+
+networks:
+  suinexus-network:
+    driver: bridge
+
+volumes:
+  backend-data:

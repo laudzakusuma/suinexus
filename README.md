@@ -1,355 +1,140 @@
-# 🌾 SuiNexus - Blockchain Supply Chain Tracking
+# SuiNexus: Platform Pelacakan Rantai Pasok Berbasis Blockchain
 
-![SuiNexus Banner](https://via.placeholder.com/1200x300/6366f1/ffffff?text=SuiNexus+Supply+Chain+Platform)
+> **SuiNexus** adalah sebuah platform terdesentralisasi yang dirancang untuk meningkatkan transparansi, keterlacakan, dan efisiensi dalam manajemen rantai pasok. Dengan memanfaatkan arsitektur objek-sentris dari blockchain Sui, platform ini merepresentasikan aset fisik sebagai *Non-Fungible Tokens* (NFTs), memungkinkan pencatatan setiap langkah dalam siklus hidup produk secara *immutable* (tidak dapat diubah) dan dapat diverifikasi.
 
-> Blockchain-powered supply chain tracking and traceability platform built on Sui Network
+---
 
-## 🚀 Features
+## Abstrak
 
-### Core Features
-- ✅ **Asset Creation** - Create harvest batches as NFTs
-- 🏢 **Entity Management** - Register farmers, processors, distributors
-- 📦 **Asset Tracking** - Real-time tracking with QR codes
-- 🔄 **Process Application** - Record processing steps with photos/videos
-- 💰 **Transfer & Invoicing** - Transfer assets with automatic invoice generation
-- 📊 **Advanced Analytics** - Comprehensive supply chain insights
-- 🗺️ **Location Tracking** - GPS-based location mapping
-- 📸 **Media Upload** - Camera capture & file uploads
-- 📱 **PWA Support** - Offline-first Progressive Web App
+Manajemen rantai pasok tradisional sering kali terfragmentasi, tidak efisien, dan kurang transparan, yang mengakibatkan kesulitan dalam melacak asal-usul produk, memverifikasi keaslian, dan mengidentifikasi titik kegagalan. SuiNexus mengatasi tantangan ini dengan menyediakan satu **sumber kebenaran** (*single source of truth*) yang terdistribusi dan dapat diaudit oleh semua pemangku kepentingan.
 
-### Technical Features
-- 🔐 Wallet integration with Sui dApp Kit
-- 📡 Real-time notifications
-- 💾 Offline data caching (IndexedDB)
-- 📄 PDF report generation
-- 🔍 QR code scanning & generation
-- 🎨 Beautiful glassmorphic UI
-- ⚡ Lightning-fast performance
-- 📱 Fully responsive design
+Setiap entitas dalam rantai pasok—mulai dari petani, pemroses, hingga distributor—dapat berinteraksi dengan aset digital yang merepresentasikan produk fisik. Setiap transaksi dan transformasi dicatat pada *ledger* blockchain yang aman, menciptakan jejak digital yang tidak dapat diubah dari hulu ke hilir.
 
-## 📋 Prerequisites
+---
 
-- **Node.js** v18+ 
-- **npm** or **yarn** or **pnpm**
-- **Sui Wallet** (Browser extension)
-- **Sui CLI** (for smart contract deployment)
+## Fitur Utama
 
-## 🛠️ Installation
+### Fungsionalitas Inti
+- **Tokenisasi Aset**: Aset fisik, seperti hasil panen, diubah menjadi aset digital unik (NFT) di blockchain Sui, memberikan identitas digital yang tidak dapat dipalsukan.
+- **Manajemen Entitas**: Pendaftaran dan pengelolaan identitas digital untuk semua pemangku kepentingan dalam rantai pasok (misalnya, petani, pabrik, distributor).
+- **Pelacakan Aset Komprehensif**: Pemantauan pergerakan dan status aset secara *real-time* melalui antarmuka pengguna atau dengan memindai kode QR yang tertaut pada aset fisik.
+- **Pencatatan Proses**: Kemampuan untuk mencatat setiap proses transformasi yang diterapkan pada aset—seperti pemrosesan, pengemasan, atau kontrol kualitas—dengan dukungan bukti media (foto/video).
+- **Transfer dan Faktur Otomatis**: Transfer kepemilikan aset antar entitas yang disertai dengan pembuatan faktur (*invoice*) digital secara otomatis dalam bentuk NFT.
+- **Analitik Rantai Pasok**: Dasbor analitik untuk memvisualisasikan data, mengidentifikasi hambatan (*bottlenecks*), dan mengukur metrik kinerja seperti waktu siklus dan efisiensi.
+- **Pelacakan Geografis**: Pencatatan data lokasi berbasis GPS pada setiap tahapan penting untuk memetakan jejak geografis produk.
 
-### 1. Clone Repository
+### Aspek Teknis
+- **Integrasi Dompet Digital**: Interaksi yang aman dengan blockchain melalui integrasi dengan standar dompet Sui menggunakan `@mysten/dapp-kit`.
+- **Notifikasi Real-Time**: Sistem notifikasi untuk memberitahu pengguna tentang peristiwa penting seperti transfer aset atau pembaruan status.
+- **Dukungan Offline (PWA)**: Dirancang sebagai *Progressive Web App* (PWA) dengan kapabilitas *offline-first*, memanfaatkan IndexedDB untuk *caching* data dan memastikan fungsionalitas tetap berjalan saat koneksi internet tidak stabil.
+- **Ekspor Data**: Fungsionalitas untuk mengekspor data analitik dan riwayat aset ke format standar seperti PDF.
 
-```bash
-git clone https://github.com/yourusername/suinexus.git
-cd suinexus
-```
+---
 
-### 2. Install Dependencies
+## Arsitektur Sistem
 
-```bash
-# Install root dependencies
-npm install
-
-# Install backend dependencies
-cd packages/backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-```
-
-### 3. Environment Configuration
-
-#### Backend (.env)
-```bash
-cd packages/backend
-cp .env.example .env
-```
-
-Edit `.env`:
-```env
-PORT=3001
-NODE_ENV=development
-
-# Sui Configuration
-SUI_NETWORK=devnet
-PACKAGE_ID=0xYOUR_PACKAGE_ID_HERE
-MODULE_NAME=nexus
-
-# Optional
-ADMIN_PRIVATE_KEY=
-
-# CORS
-CORS_ORIGIN=http://localhost:3000
-```
-
-#### Frontend (.env)
-```bash
-cd packages/frontend
-```
-
-Create `.env`:
-```env
-VITE_API_BASE_URL=http://localhost:3001/api
-VITE_PACKAGE_ID=0xYOUR_PACKAGE_ID_HERE
-VITE_MODULE_NAME=nexus
-VITE_SUI_NETWORK=devnet
-```
-
-### 4. Deploy Smart Contract (if not deployed)
-
-```bash
-# Navigate to contract directory
-cd packages/contract
-
-# Build the contract
-sui move build
-
-# Deploy to devnet
-sui client publish --gas-budget 100000000
-
-# Copy the Package ID from output and update .env files
-```
-
-## 🚀 Running the Application
-
-### Development Mode
-
-Open 3 terminal windows:
-
-**Terminal 1 - Backend:**
-```bash
-cd packages/backend
-npm run dev
-```
-Backend runs on http://localhost:3001
-
-**Terminal 2 - Frontend:**
-```bash
-cd packages/frontend
-npm run dev
-```
-Frontend runs on http://localhost:3000
-
-**Terminal 3 - Watch (Optional):**
-```bash
-# For auto-restart on changes
-npm run dev --workspace=backend --workspace=frontend
-```
-
-### Production Build
-
-**Backend:**
-```bash
-cd packages/backend
-npm run build
-npm start
-```
-
-**Frontend:**
-```bash
-cd packages/frontend
-npm run build
-npm run preview
-```
-
-## 📱 Using the Application
-
-### 1. Setup Wallet
-- Install [Sui Wallet](https://chrome.google.com/webstore/detail/sui-wallet) extension
-- Create or import wallet
-- Switch to Devnet
-- Get test tokens from [Sui Devnet Faucet](https://discord.gg/sui)
-
-### 2. Connect Wallet
-- Open http://localhost:3000
-- Click "Connect Wallet"
-- Approve connection
-
-### 3. Create Entity
-- Navigate to "Create Entity"
-- Select type (Farmer, Processor, Distributor, Retailer)
-- Fill in details
-- Sign transaction
-
-### 4. Create Harvest Batch
-- Go to "Create Harvest"
-- Enter product details
-- Set quantity and unit
-- Create asset (NFT will be minted)
-
-### 5. Apply Process
-- Select "Apply Process"
-- Choose asset and processor entity
-- Upload photos/videos
-- Add sensor data (temperature, humidity)
-- Record GPS location
-- Apply process
-
-### 6. Transfer Asset
-- Go to "Transfer"
-- Enter asset ID and recipient
-- Set invoice amount and due date
-- Transfer (creates invoice NFT)
-
-### 7. Track Assets
-- Visit "Tracking"
-- Search by ID or scan QR code
-- View full timeline
-- See location map
-- Download QR code
-
-### 8. View Analytics
-- Open "Analytics"
-- View comprehensive metrics
-- Export PDF report
-- Analyze bottlenecks
-- Track performance
-
-## 🏗️ Project Structure
+SuiNexus mengadopsi arsitektur **monorepo** yang dikelola dengan npm/pnpm workspaces, memisahkan komponen-komponen logis ke dalam paket-paket independen.
 
 ```
 suinexus/
 ├── packages/
-│   ├── backend/           # Express.js API
-│   │   ├── src/
-│   │   │   ├── config/    # Configuration
-│   │   │   ├── controllers/
-│   │   │   ├── routes/
-│   │   │   ├── types/
-│   │   │   └── index.ts
-│   │   ├── .env.example
-│   │   └── package.json
-│   │
-│   ├── frontend/          # React + TypeScript
-│   │   ├── public/
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   ├── pages/
-│   │   │   ├── services/
-│   │   │   ├── hooks/
-│   │   │   ├── styles/
-│   │   │   └── types/
-│   │   └── package.json
-│   │
-│   └── contract/          # Sui Move Smart Contract
-│       └── sources/
-│           └── nexus.move
-│
-└── README.md
+│   ├── backend/          # API Service (Node.js/Express)
+│   ├── frontend/         # Aplikasi Klien (React/Vite)
+│   └── contracts/        # Smart Contracts (Sui Move)
+└── ...
 ```
 
-## 🧪 Testing
+| Komponen | Teknologi | Deskripsi |
+| :--- | :--- | :--- |
+| **Smart Contracts** | Sui Move | Inti dari logika bisnis terdesentralisasi. Mendefinisikan struktur data untuk Aset (`DynamicAssetNFT`), Entitas (`EntityObject`), dan Faktur (`InvoiceNFT`), serta fungsi untuk berinteraksi dengannya. |
+| **Backend** | Node.js, Express | Berfungsi sebagai lapisan perantara antara klien dan blockchain Sui. Menyediakan API RESTful untuk kueri data yang kompleks dan agregasi. |
+| **Frontend** | React, TypeScript, Vite | Antarmuka pengguna yang memungkinkan interaksi dengan *smart contract* melalui dompet digital dan menyajikan data rantai pasok dalam format yang mudah dipahami. |
 
+---
+
+## Prasyarat
+
+- **Node.js**: Versi `18` atau lebih tinggi.
+- **Manajer Paket**: `npm`, `yarn`, atau `pnpm`.
+- **Sui Wallet**: Ekstensi peramban untuk interaksi dengan dApp.
+- **Sui CLI**: Diperlukan untuk kompilasi dan deployment *smart contract*.
+
+---
+
+## Panduan Instalasi dan Menjalankan
+
+### 1. Kloning Repositori
 ```bash
-# Backend tests
-cd packages/backend
-npm test
-
-# Frontend tests
-cd packages/frontend
-npm test
-
-# E2E tests
-npm run test:e2e
+git clone [https://github.com/yourusername/suinexus.git](https://github.com/yourusername/suinexus.git)
+cd suinexus
 ```
 
-## 📦 Build for Production
-
+### 2. Instalasi Dependensi
+Jalankan perintah berikut dari direktori root untuk menginstal semua dependensi di seluruh *workspace*.
 ```bash
-# Build all packages
-npm run build
-
-# Build specific package
-npm run build --workspace=frontend
-npm run build --workspace=backend
+npm install
 ```
 
-## 🚢 Deployment
+### 3. Konfigurasi Lingkungan
+Setiap paket (`backend` dan `frontend`) memerlukan file `.env` sendiri. Salin dari file `.env.example` yang tersedia dan sesuaikan nilainya.
 
-### Backend (Railway/Render/DigitalOcean)
+- **Backend (`packages/backend/.env`)**:
+    ```env
+    PORT=3001
+    SUI_NETWORK=devnet
+    PACKAGE_ID=0x...
+    MODULE_NAME=nexus
+    CORS_ORIGIN=http://localhost:5173
+    ```
+- **Frontend (`packages/frontend/.env`)**:
+    ```env
+    VITE_API_BASE_URL=http://localhost:3001/api
+    VITE_PACKAGE_ID=0x...
+    VITE_MODULE_NAME=nexus
+    VITE_SUI_NETWORK=devnet
+    ```
+    **Penting**: `PACKAGE_ID` harus diisi dengan ID yang didapat setelah men-deploy *smart contract*.
 
-1. Set environment variables
-2. Deploy from GitHub
-3. Update CORS_ORIGIN
-
-### Frontend (Vercel/Netlify)
-
+### 4. Deployment Smart Contract
 ```bash
-cd packages/frontend
-npm run build
+# Arahkan ke direktori kontrak
+cd packages/contracts
 
-# Deploy dist/ folder
+# Deploy ke jaringan yang diinginkan (contoh: devnet)
+sui client publish --gas-budget 100000000
 ```
+Salin **Package ID** dari hasil output dan masukkan ke dalam file `.env` backend dan frontend.
 
-Set environment variables in platform dashboard.
+### 5. Menjalankan Aplikasi (Mode Pengembangan)
+Gunakan perintah berikut dari direktori root untuk menjalankan backend dan frontend secara bersamaan.
+```bash
+npm run dev
+```
+- Backend akan berjalan di `http://localhost:3001`.
+- Frontend akan berjalan di `http://localhost:5173`.
 
-### Smart Contract (Sui Mainnet)
+---
 
+## Deployment Produksi
+
+### **Backend**
+Aplikasi backend dapat di-build dan dijalankan sebagai proses Node.js standar. Disarankan untuk men-deploy-nya sebagai kontainer Docker di platform seperti Railway, Render, atau layanan cloud lainnya.
+
+### **Frontend**
+Aplikasi frontend adalah aplikasi web statis. Setelah proses build, hasilnya (di dalam direktori `dist`) dapat di-deploy di platform hosting statis seperti Vercel atau Netlify.
+
+### **Smart Contract**
+Untuk men-deploy ke jaringan utama Sui, gunakan flag `--network mainnet`:
 ```bash
 sui client publish --gas-budget 100000000 --network mainnet
 ```
 
-## 🛡️ Security Considerations
-
-- ✅ Never commit `.env` files
-- ✅ Use environment variables for secrets
-- ✅ Enable rate limiting in production
-- ✅ Validate all user inputs
-- ✅ Use HTTPS in production
-- ✅ Keep dependencies updated
-- ✅ Implement proper error handling
-
-## 📚 API Documentation
-
-### Endpoints
-
-#### Assets
-- `GET /api/assets/owner/:address` - Get assets by owner
-- `GET /api/assets/:id` - Get asset details
-
-#### Entities
-- `GET /api/entities/owner/:address` - Get entities by owner
-- `GET /api/entities/:id` - Get entity details
-
-#### Health
-- `GET /api/health` - Health check
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- Sui Foundation
-- Mysten Labs
-- Open source community
-
-## 📧 Support
-
-- 📧 Email: support@suinexus.com
-- 💬 Discord: [Join our server](#)
-- 🐦 Twitter: [@SuiNexus](#)
-- 📚 Docs: [docs.suinexus.com](#)
-
-## 🗺️ Roadmap
-
-- [ ] Mobile apps (iOS & Android)
-- [ ] Multi-language support
-- [ ] Advanced AI analytics
-- [ ] IoT sensor integration
-- [ ] Marketplace integration
-- [ ] DAO governance
-- [ ] Token economics
-
 ---
 
-**Built with ❤️ on Sui Network**
+## Kontribusi
+
+Kontribusi pada proyek ini sangat dihargai. Silakan buat *fork* dari repositori ini, buat *branch* fitur baru (`git checkout -b feature/NamaFitur`), dan kirimkan *pull request* untuk ditinjau.
+
+## Lisensi
+
+Proyek ini dilisensikan di bawah **Lisensi MIT**.

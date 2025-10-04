@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, User, Package, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import styles from './Timeline.module.css';
+import styles from './TimeLine.module.css';
 
 export interface TimelineEvent {
   id: string;

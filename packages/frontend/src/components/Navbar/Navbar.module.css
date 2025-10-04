@@ -99,12 +99,65 @@
   border-radius: 2px;
 }
 
-.walletSection {
+/* Desktop Actions Section */
+.navActions {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
+.notificationButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.notificationButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.connectButton {
+  flex-shrink: 0;
+}
+
+/* Style Sui Wallet Connect Button */
+.connectButton :global(button) {
+  padding: 0.75rem 1.5rem !important;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  height: 44px !important;
+  min-width: 140px !important;
+}
+
+.connectButton :global(button:hover) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5) !important;
+}
+
+.connectButton :global(button:active) {
+  transform: translateY(0) !important;
+}
+
+/* Account Info (when connected) */
 .accountInfo {
   display: flex;
   align-items: center;
@@ -140,42 +193,7 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.connectButton {
-  background-color: #f0f0f0;
-  padding: 10px;
-}
-
-@media (max-width: 1024px) {
-  .navLinks {
-    gap: 0.25rem;
-  }
-  
-  .navLink {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .navLink span {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-    gap: 1rem;
-  }
-  
-  .logoText {
-    font-size: 1.2rem;
-  }
-  
-  .accountInfo {
-    display: none;
-  }
-}
-
-/* Mobile Actions - Always Visible */
+/* Mobile Actions */
 .mobileActions {
   display: none;
   align-items: center;
@@ -184,6 +202,16 @@
 
 .mobileConnectButton {
   flex-shrink: 0;
+}
+
+.mobileConnectButton :global(button) {
+  padding: 0.625rem 1.25rem !important;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
 }
 
 /* Mobile Menu Button */
@@ -242,7 +270,31 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .navLinks {
+    gap: 0.25rem;
+  }
+  
+  .navLink {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .navLink span {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+  
+  .logoText {
+    font-size: 1.2rem;
+  }
+  
   .navLinks {
     display: none;
   }
@@ -253,5 +305,9 @@
   
   .mobileActions {
     display: flex;
+  }
+  
+  .accountInfo {
+    display: none;
   }
 }

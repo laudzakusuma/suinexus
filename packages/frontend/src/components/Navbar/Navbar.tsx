@@ -10,10 +10,10 @@ import {
   Settings, 
   Search, 
   BarChart3,
-  Bell,
   Menu,
   X
 } from 'lucide-react'
+import NotificationCenter from '../NotificationCenter/NotificationCenter'
 import styles from './Navbar.module.css'
 
 const Navbar = () => {
@@ -62,15 +62,13 @@ const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className={styles.navActions}>
-          <button className={styles.notificationButton}>
-            <Bell size={20} />
-          </button>
+          <NotificationCenter />
           <div className={styles.connectButton}>
             <ConnectButton />
           </div>
         </div>
 
-        {/* Mobile Actions - Connect Button Always Visible */}
+        {/* Mobile Actions */}
         <div className={styles.mobileActions}>
           <div className={styles.mobileConnectButton}>
             <ConnectButton />
@@ -84,7 +82,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu - Navigation Only */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

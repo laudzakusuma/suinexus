@@ -1,8 +1,17 @@
 import { useState } from 'react';
-import { GoogleMap, Marker, InfoWindow, Polyline, useJsApiLoader } from '@react-google-maps/api';
-import { motion } from 'framer-motion';
-import { MapPin, Navigation, Maximize2 } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapPin, Maximize2 } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import styles from './LocationMap.module.css';
+
+// Fix default marker icons using CDN
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 export interface MapLocation {
   id: string;
@@ -22,11 +31,6 @@ interface LocationMapProps {
   height?: string;
 }
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%'
-};
-
 const defaultCenter = {
   lat: -6.2088,
   lng: 106.8456
@@ -39,16 +43,7 @@ const LocationMap = ({
   showRoute = true,
   height = '400px'
 }: LocationMapProps) => {
-  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-  const [mapCenter, setMapCenter] = useState(center);
-  const [mapZoom] = useState(zoom); // ⬅️ Remove setMapZoom
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const hasApiKey = !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-  });
 
   const getMarkerColor = (type?: string) => {
     const colors: Record<string, string> = {
@@ -60,67 +55,59 @@ const LocationMap = ({
     return colors[type || 'origin'] || '#6366f1';
   };
 
-  const recenterMap = () => {
-    if (locations.length > 0) {
-      const avgLat = locations.reduce((sum, loc) => sum + loc.lat, 0) / locations.length;
-      const avgLng = locations.reduce((sum, loc) => sum + loc.lng, 0) / locations.length;
-      setMapCenter({ lat: avgLat, lng: avgLng });
-    }
+  const createCustomIcon = (type?: string, index?: number) => {
+    const color = getMarkerColor(type);
+    return L.divIcon({
+      className: 'custom-marker',
+      html: `
+        <div style="
+          background: ${color};
+          width: 36px;
+          height: 36px;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          border: 3px solid white;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <span style="
+            transform: rotate(45deg);
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+          ">${index !== undefined ? index + 1 : '📍'}</span>
+        </div>
+      `,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36]
+    });
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
+  const mapCenter = locations.length > 0 
+    ? {
+        lat: locations.reduce((sum, loc) => sum + loc.lat, 0) / locations.length,
+        lng: locations.reduce((sum, loc) => sum + loc.lng, 0) / locations.length
+      }
+    : center;
 
-  // Static map fallback for MVP
-  if (!hasApiKey || !isLoaded) {
+  const routePath = showRoute && locations.length > 1
+    ? locations.map(loc => [loc.lat, loc.lng] as [number, number])
+    : [];
+
+  if (locations.length === 0) {
     return (
-      <div className={styles.container} style={{ height }}>
-        <div className={styles.staticMap}>
-          <div className={styles.staticMapOverlay}>
-            <MapPin size={48} />
-            <h3>Map View</h3>
-            <p>
-              {locations.length} location{locations.length !== 1 ? 's' : ''} tracked
-            </p>
-            <div className={styles.locationsList}>
-              {locations.map((loc, index) => (
-                <motion.div
-                  key={loc.id}
-                  className={styles.locationItem}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <div 
-                    className={styles.locationMarker}
-                    style={{ background: getMarkerColor(loc.type) }}
-                  >
-                    {index + 1}
-                  </div>
-                  <div className={styles.locationInfo}>
-                    <h4>{loc.title}</h4>
-                    <p>{loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}</p>
-                    {loc.description && (
-                      <span className={styles.locationDesc}>{loc.description}</span>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-            <p className={styles.staticMapNote}>
-              💡 Add VITE_GOOGLE_MAPS_API_KEY to .env for interactive map
-            </p>
-          </div>
+      <div className={styles.staticMap} style={{ height }}>
+        <div className={styles.staticMapOverlay}>
+          <MapPin size={48} />
+          <h3>No Locations Yet</h3>
+          <p>Location data will appear here when available</p>
         </div>
       </div>
     );
   }
-
-  // Interactive Google Map
-  const routePath = showRoute && locations.length > 1
-    ? locations.map(loc => ({ lat: loc.lat, lng: loc.lng }))
-    : [];
 
   return (
     <div 
@@ -130,101 +117,93 @@ const LocationMap = ({
       <div className={styles.mapControls}>
         <button 
           className={styles.controlButton}
-          onClick={recenterMap}
-          title="Recenter map"
-        >
-          <Navigation size={18} />
-        </button>
-        <button 
-          className={styles.controlButton}
-          onClick={toggleFullscreen}
+          onClick={() => setIsFullscreen(!isFullscreen)}
           title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
         >
           <Maximize2 size={18} />
         </button>
       </div>
 
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={mapCenter}
-        zoom={mapZoom}
-        options={{
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-          styles: [
-            {
-              featureType: 'all',
-              elementType: 'geometry',
-              stylers: [{ color: '#242f3e' }]
-            },
-            {
-              featureType: 'all',
-              elementType: 'labels.text.stroke',
-              stylers: [{ color: '#242f3e' }]
-            },
-            {
-              featureType: 'all',
-              elementType: 'labels.text.fill',
-              stylers: [{ color: '#746855' }]
-            }
-          ]
-        }}
+      <MapContainer
+        center={[mapCenter.lat, mapCenter.lng]}
+        zoom={zoom}
+        style={{ width: '100%', height: '100%', borderRadius: '15px' }}
+        scrollWheelZoom={true}
       >
-        {/* Route line */}
-        {showRoute && routePath.length > 1 && (
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {routePath.length > 1 && (
           <Polyline
-            path={routePath}
-            options={{
-              strokeColor: '#6366f1',
-              strokeOpacity: 0.8,
-              strokeWeight: 3,
-              geodesic: true
+            positions={routePath}
+            pathOptions={{
+              color: '#6366f1',
+              weight: 3,
+              opacity: 0.7,
             }}
           />
         )}
 
-        {/* Location markers */}
         {locations.map((location, index) => (
           <Marker
             key={location.id}
-            position={{ lat: location.lat, lng: location.lng }}
-            onClick={() => setSelectedLocation(location)}
-            label={{
-              text: (index + 1).toString(),
-              color: 'white',
-              fontSize: '12px',
-              fontWeight: 'bold'
-            }}
-            icon={{
-              path: window.google.maps.SymbolPath.CIRCLE,
-              fillColor: getMarkerColor(location.type),
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
-              scale: 12
-            }}
-          />
-        ))}
-
-        {/* Info window */}
-        {selectedLocation && (
-          <InfoWindow
-            position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
-            onCloseClick={() => setSelectedLocation(null)}
+            position={[location.lat, location.lng]}
+            icon={createCustomIcon(location.type, index)}
           >
-            <div className={styles.infoWindow}>
-              <h4>{selectedLocation.title}</h4>
-              {selectedLocation.description && (
-                <p>{selectedLocation.description}</p>
-              )}
-              <span className={styles.coordinates}>
-                {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
-              </span>
-            </div>
-          </InfoWindow>
-        )}
-      </GoogleMap>
+            <Popup>
+              <div style={{ 
+                minWidth: '200px',
+                padding: '8px',
+                color: '#1a1a2e'
+              }}>
+                <h4 style={{ 
+                  margin: '0 0 8px 0', 
+                  fontSize: '1rem', 
+                  fontWeight: '600',
+                  color: getMarkerColor(location.type)
+                }}>
+                  {location.title}
+                </h4>
+                {location.description && (
+                  <p style={{ 
+                    margin: '0 0 8px 0', 
+                    fontSize: '0.85rem', 
+                    color: '#666' 
+                  }}>
+                    {location.description}
+                  </p>
+                )}
+                <span style={{ 
+                  display: 'block', 
+                  fontSize: '0.75rem', 
+                  color: '#999',
+                  fontFamily: 'monospace'
+                }}>
+                  {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                </span>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '20px',
+        left: '20px',
+        padding: '8px 16px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        fontSize: '0.85rem',
+        fontWeight: '600',
+        color: '#1a1a2e',
+        zIndex: 1000
+      }}>
+        📍 {locations.length} location{locations.length !== 1 ? 's' : ''} tracked
+      </div>
     </div>
   );
 };

@@ -225,3 +225,31 @@
     max-height: 200px;
   }
 }
+
+.leaflet-container {
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-control-zoom a {
+  border-radius: 8px !important;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  transform: scale(1.05);
+}
+
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}

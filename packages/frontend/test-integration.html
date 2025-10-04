@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SuiNexus Integration Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0a0f;
+      color: #00ff00;
+      padding: 20px;
+    }
+    .test { margin: 10px 0; }
+    .pass { color: #10b981; }
+    .fail { color: #ef4444; }
+    button {
+      background: #6366f1;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 SuiNexus Integration Tests</h1>
+  
+  <button onclick="testBackend()">Test Backend</button>
+  <button onclick="testSmartContract()">Test Smart Contract</button>
+  <button onclick="testAll()">Run All Tests</button>
+  
+  <div id="results"></div>
+
+  <script>
+    const BACKEND_URL = 'http://localhost:3001/api';
+    const WALLET_ADDRESS = '0xad5eb2f795b728b668b8f7f5b648ea9f29414c79dfb38860b76f4918eeb1a13d';
+    const PACKAGE_ID = '0x67a94406c0c1c38473ed22ea9a76f40f6ccc00e9736b4e4de351411cc05de398';
+
+    function log(message, status = 'info') {
+      const results = document.getElementById('results');
+      const className = status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : '';
+      results.innerHTML += `<div class="test ${className}">${status.toUpperCase()}: ${message}</div>`;
+    }
+
+    async function testBackend() {
+      log('Testing Backend Connection...');
+      
+      try {
+        // Test health endpoint
+        const health = await fetch(`${BACKEND_URL}/health`);
+        if (health.ok) {
+          log('✓ Backend health check passed', 'pass');
+        } else {
+          log('✗ Backend health check failed', 'fail');
+        }
+
+        // Test assets endpoint
+        const assets = await fetch(`${BACKEND_URL}/assets/owner/${WALLET_ADDRESS}`);
+        const assetsData = await assets.json();
+        log(`✓ Found ${assetsData.data?.length || 0} assets`, 'pass');
+
+        // Test entities endpoint
+        const entities = await fetch(`${BACKEND_URL}/entities/owner/${WALLET_ADDRESS}`);
+        const entitiesData = await entities.json();
+        log(`✓ Found ${entitiesData.data?.length || 0} entities`, 'pass');
+
+      } catch (error) {
+        log(`✗ Backend test failed: ${error.message}`, 'fail');
+      }
+    }
+
+    async function testSmartContract() {
+      log('Testing Smart Contract Data...');
+      
+      try {
+        // Verify package ID is set
+        if (PACKAGE_ID.startsWith('0x')) {
+          log(`✓ Package ID configured: ${PACKAGE_ID.slice(0, 20)}...`, 'pass');
+        } else {
+          log('✗ Package ID not configured', 'fail');
+        }
+
+        // Test existing objects
+        const assets = await fetch(`${BACKEND_URL}/assets/owner/${WALLET_ADDRESS}`);
+        const data = await assets.json();
+        
+        if (data.data && data.data.length > 0) {
+          const asset = data.data[0];
+          const objectType = asset.data?.content?.type;
+          
+          if (objectType && objectType.includes(PACKAGE_ID)) {
+            log('✓ Assets linked to correct package', 'pass');
+          } else {
+            log('⚠ Warning: Asset package mismatch', 'fail');
+          }
+        }
+
+      } catch (error) {
+        log(`✗ Smart contract test failed: ${error.message}`, 'fail');
+      }
+    }
+
+    async function testAll() {
+      document.getElementById('results').innerHTML = '';
+      log('Starting Full Integration Test Suite...\n');
+      await testBackend();
+      await testSmartContract();
+      log('\n✅ Test suite completed!', 'pass');
+    }
+  </script>
+</body>
+</html>

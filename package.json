@@ -21,6 +21,7 @@
     "deploy:contract": "cd packages/contract && sui client publish --gas-budget 100000000"
   },
   "devDependencies": {
+    "@types/node": "^20.19.19",
     "@vercel/node": "^5.3.24",
     "concurrently": "^8.2.2"
   },

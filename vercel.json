@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "packages/frontend/package.json",
+      "use": "@vercel/vite"
+    },
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    }
+  ]
+}

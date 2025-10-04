@@ -18,33 +18,30 @@ const networks = {
   mainnet: { url: getFullnodeUrl('mainnet') },
 }
 
-// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('Service Worker registered:', registration);
-      })
-      .catch(error => {
-        console.error('Service Worker registration failed:', error);
-      });
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
   });
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <SuiClientProvider networks={networks} defaultNetwork="devnet">
-          <WalletProvider>
-            <ToastProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
-            </ToastProvider>
-          </WalletProvider>
-        </SuiClientProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  </React.StrictMode>,
-)
+const root = document.getElementById('root');
+
+if (root) {
+  ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <SuiClientProvider networks={networks} defaultNetwork="devnet">
+            <WalletProvider>
+              <ToastProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </ToastProvider>
+            </WalletProvider>
+          </SuiClientProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
+}

@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Image, Video, File, Check } from 'lucide-react';
+import { Upload, X, Image, Video, File, Check, Camera } from 'lucide-react';
 import { FileUploadService, UploadedFile } from '../../services/fileUpload';
+import CameraCapture from '../CameraCapture/CameraCapture';
 import styles from './FileUpload.module.css';
 
 interface FileUploadProps {
@@ -10,16 +11,19 @@ interface FileUploadProps {
   maxFiles?: number;
   acceptedTypes?: string;
   label?: string;
+  allowCamera?: boolean;
 }
 
 const FileUpload = ({ 
   onFilesUploaded, 
   maxFiles = 5,
   acceptedTypes = 'image/*,video/*',
-  label = 'Upload Photos/Videos'
+  label = 'Upload Photos/Videos',
+  allowCamera = true
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -54,6 +58,12 @@ const FileUpload = ({
     onFilesUploaded(filtered);
   };
 
+  const handleCameraCapture = (file: UploadedFile) => {
+    const newFiles = [...uploadedFiles, file].slice(0, maxFiles);
+    setUploadedFiles(newFiles);
+    onFilesUploaded(newFiles);
+  };
+
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'image': return <Image size={20} />;
@@ -72,26 +82,40 @@ const FileUpload = ({
     <div className={styles.container}>
       <label className={styles.label}>{label}</label>
       
-      <div
-        {...getRootProps()}
-        className={`${styles.dropzone} ${isDragActive ? styles.active : ''} ${uploading ? styles.uploading : ''}`}
-      >
-        <input {...getInputProps()} />
-        <Upload size={32} />
-        <p className={styles.dropzoneText}>
-          {isDragActive ? (
-            'Drop files here...'
-          ) : uploading ? (
-            'Uploading...'
-          ) : (
-            <>
-              Drag & drop files here, or click to select
-              <span className={styles.dropzoneHint}>
-                {uploadedFiles.length}/{maxFiles} files (Max 10MB each)
-              </span>
-            </>
-          )}
-        </p>
+      <div className={styles.uploadActions}>
+        <div
+          {...getRootProps()}
+          className={`${styles.dropzone} ${isDragActive ? styles.active : ''} ${uploading ? styles.uploading : ''}`}
+        >
+          <input {...getInputProps()} />
+          <Upload size={32} />
+          <p className={styles.dropzoneText}>
+            {isDragActive ? (
+              'Drop files here...'
+            ) : uploading ? (
+              'Uploading...'
+            ) : (
+              <>
+                Drag & drop or click to select
+                <span className={styles.dropzoneHint}>
+                  {uploadedFiles.length}/{maxFiles} files (Max 10MB each)
+                </span>
+              </>
+            )}
+          </p>
+        </div>
+
+        {allowCamera && (
+          <button
+            className={styles.cameraButton}
+            onClick={() => setShowCamera(true)}
+            disabled={uploadedFiles.length >= maxFiles}
+            type="button"
+          >
+            <Camera size={24} />
+            Take Photo
+          </button>
+        )}
       </div>
 
       <AnimatePresence>
@@ -134,6 +158,13 @@ const FileUpload = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {showCamera && (
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
     </div>
   );
 };

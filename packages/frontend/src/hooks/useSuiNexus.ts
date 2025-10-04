@@ -9,7 +9,7 @@ export function useEntities() {
     queryKey: ['entities', account?.address],
     queryFn: () => ApiService.getEntitiesByOwner(account!.address),
     enabled: !!account,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
   });
 }
 
@@ -27,8 +27,9 @@ export function useAssets() {
 export function useAsset(assetId: string | undefined) {
   return useQuery({
     queryKey: ['asset', assetId],
-    queryFn: () => ApiService.getAssetById(assetId!),
+    queryFn: () => ApiService.getAsset(assetId!), // ← Changed from getAssetById to getAsset
     enabled: !!assetId,
+    staleTime: 10000,
   });
 }
 
@@ -38,6 +39,7 @@ export function useInvalidateQueries() {
   return {
     invalidateEntities: () => queryClient.invalidateQueries({ queryKey: ['entities'] }),
     invalidateAssets: () => queryClient.invalidateQueries({ queryKey: ['assets'] }),
+    invalidateAsset: (assetId: string) => queryClient.invalidateQueries({ queryKey: ['asset', assetId] }),
     invalidateAll: () => queryClient.invalidateQueries(),
   };
 }

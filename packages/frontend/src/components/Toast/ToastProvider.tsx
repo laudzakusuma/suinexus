@@ -1,64 +1,94 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
-import { AnimatePresence } from 'framer-motion'
-import Toast, { ToastType } from './Toast'
-import styles from './ToastProvider.module.css'
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
+import styles from './ToastProvider.module.css';
 
-interface ToastMessage {
-  id: string
-  message: string
-  type: ToastType
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+interface Toast {
+  id: string;
+  type: ToastType;
+  message: string;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type: ToastType) => void
-  success: (message: string) => void
-  error: (message: string) => void
-  warning: (message: string) => void
-  info: (message: string) => void
+  success: (message: string) => void;
+  error: (message: string) => void;
+  warning: (message: string) => void;
+  info: (message: string) => void;
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+const ToastContext = createContext<ToastContextType | null>(null);
 
-export const useToast = () => {
-  const context = useContext(ToastContext)
+export function useToast(): ToastContextType {
+  const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within ToastProvider')
+    // Return dummy functions instead of throwing during SSR or if provider missing
+    return {
+      success: () => {},
+      error: () => {},
+      warning: () => {},
+      info: () => {}
+    };
   }
-  return context
+  return context;
 }
 
-export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([])
+interface ToastProviderProps {
+  children: ReactNode;
+}
 
-  const showToast = (message: string, type: ToastType) => {
-    const id = Math.random().toString(36).substring(2, 9)
-    setToasts((prev) => [...prev, { id, message, type }])
-  }
+export function ToastProvider({ children }: ToastProviderProps) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id))
-  }
+  const addToast = useCallback((type: ToastType, message: string) => {
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    setToasts(prev => [...prev, { id, type, message }]);
 
-  const success = (message: string) => showToast(message, 'success')
-  const error = (message: string) => showToast(message, 'error')
-  const warning = (message: string) => showToast(message, 'warning')
-  const info = (message: string) => showToast(message, 'info')
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const contextValue: ToastContextType = {
+    success: useCallback((msg: string) => addToast('success', msg), [addToast]),
+    error: useCallback((msg: string) => addToast('error', msg), [addToast]),
+    warning: useCallback((msg: string) => addToast('warning', msg), [addToast]),
+    info: useCallback((msg: string) => addToast('info', msg), [addToast]),
+  };
 
   return (
-    <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className={styles.toastContainer}>
         <AnimatePresence>
-          {toasts.map((toast) => (
-            <Toast
+          {toasts.map(toast => (
+            <motion.div
               key={toast.id}
-              message={toast.message}
-              type={toast.type}
-              onClose={() => removeToast(toast.id)}
-            />
+              className={`${styles.toast} ${styles[toast.type]}`}
+              initial={{ opacity: 0, y: -50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+            >
+              <div className={styles.toastIcon}>
+                {toast.type === 'success' && <CheckCircle size={20} />}
+                {toast.type === 'error' && <XCircle size={20} />}
+                {toast.type === 'warning' && <AlertCircle size={20} />}
+                {toast.type === 'info' && <Info size={20} />}
+              </div>
+              <p className={styles.toastMessage}>{toast.message}</p>
+              <button className={styles.toastClose} onClick={() => removeToast(toast.id)}>
+                <X size={16} />
+              </button>
+            </motion.div>
           ))}
         </AnimatePresence>
       </div>
     </ToastContext.Provider>
-  )
+  );
 }

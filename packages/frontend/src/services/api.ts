@@ -114,6 +114,10 @@ class ApiService {
     }
   }
 
+  async getAssetById(assetId: string) {
+    return this.getAsset(assetId);
+  }
+
   async syncPendingTransactions() {
     const pending = await db.getPendingTransactions();
     

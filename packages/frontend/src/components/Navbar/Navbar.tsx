@@ -1,20 +1,31 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit'
-import { motion } from 'framer-motion'
-import { Home, Package, Plus, Send, Workflow, Search, BarChart3 } from 'lucide-react'
-import NotificationCenter from '../NotificationCenter/NotificationCenter'
+import { ConnectButton } from '@mysten/dapp-kit'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  Home, 
+  UserPlus, 
+  Package, 
+  Send, 
+  Settings, 
+  Search, 
+  BarChart3,
+  Bell,
+  Menu,
+  X
+} from 'lucide-react'
 import styles from './Navbar.module.css'
 
 const Navbar = () => {
   const location = useLocation()
-  const account = useCurrentAccount()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/create-entity', label: 'Create Entity', icon: Plus },
+    { path: '/create-entity', label: 'Create Entity', icon: UserPlus },
     { path: '/create-harvest', label: 'Harvest', icon: Package },
     { path: '/transfer', label: 'Transfer', icon: Send },
-    { path: '/process', label: 'Process', icon: Workflow },
+    { path: '/process', label: 'Process', icon: Settings },
     { path: '/tracking', label: 'Tracking', icon: Search },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   ]
@@ -23,23 +34,19 @@ const Navbar = () => {
     <nav className={styles.navbar}>
       <div className={styles.container}>
         <Link to="/" className={styles.logo}>
-          <motion.div
-            className={styles.logoIcon}
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className={styles.logoIcon}>
             <Package size={28} />
-          </motion.div>
+          </div>
           <span className={styles.logoText}>
             Sui<span className={styles.logoAccent}>Nexus</span>
           </span>
         </Link>
 
+        {/* Desktop Navigation */}
         <div className={styles.navLinks}>
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
-            
             return (
               <Link
                 key={item.path}
@@ -48,33 +55,64 @@ const Navbar = () => {
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
-                {isActive && (
-                  <motion.div
-                    className={styles.activeIndicator}
-                    layoutId="activeIndicator"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
               </Link>
             )
           })}
         </div>
 
-        <div className={styles.walletSection}>
-          <NotificationCenter />
-          {account && (
-            <div className={styles.accountInfo}>
-              <div className={styles.statusDot} />
-              <span className={styles.address}>
-                {account.address.slice(0, 6)}...{account.address.slice(-4)}
-              </span>
-            </div>
-          )}
+        {/* Desktop Actions */}
+        <div className={styles.navActions}>
+          <button className={styles.notificationButton}>
+            <Bell size={20} />
+          </button>
           <div className={styles.connectButton}>
             <ConnectButton />
           </div>
         </div>
+
+        {/* Mobile Actions - Connect Button Always Visible */}
+        <div className={styles.mobileActions}>
+          <div className={styles.mobileConnectButton}>
+            <ConnectButton />
+          </div>
+          <button 
+            className={styles.mobileMenuButton}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu - Navigation Only */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            className={styles.mobileMenu}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <div className={styles.mobileNavLinks}>
+              {navItems.map((item) => {
+                const Icon = item.icon
+                const isActive = location.pathname === item.path
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`${styles.mobileNavLink} ${isActive ? styles.active : ''}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }

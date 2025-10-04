@@ -1,391 +1,339 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useCurrentAccount } from '@mysten/dapp-kit'
+import { useNavigate } from 'react-router-dom'
+import { 
+  Package, 
+  Users, 
+  TrendingUp, 
+  Activity, 
+  ArrowRight,
+  Plus,
+  RefreshCw,
+  Send,
+  Settings
+} from 'lucide-react'
 import axios from 'axios'
-import { Package, Users, TrendingUp, Activity, BarChart3 } from 'lucide-react'
 import styles from './Dashboard.module.css'
-import QRCodeGenerator from '../../components/QRCode/QRCodeGenerator'
-import ExportCSV from '../../components/ExportCSV/ExportCSV'
-import AnalyticsChart from '../../components/Analytics/AnalyticsChart'
-import SearchFilter from '../../components/SearchFilter/SearchFilter'
-import { SkeletonCard } from '../../components/Loading/Loading'
 import { useToast } from '../../components/Toast/ToastProvider'
+import Loading from '../../components/Loading/Loading'
 import AnimatedNumber from '../../components/AnimatedNumber/AnimatedNumber'
+
+interface RecentAsset {
+  id: string
+  name: string
+  state: string
+  timestamp: number
+}
 
 const Dashboard = () => {
   const account = useCurrentAccount()
+  const navigate = useNavigate()
   const toast = useToast()
-  const [showQR, setShowQR] = useState(false)
-  const [entities, setEntities] = useState<any[]>([])
-  const [assets, setAssets] = useState<any[]>([])
+  const [stats, setStats] = useState({
+    totalAssets: 0,
+    totalEntities: 0,
+    recentActivity: 0,
+    growthRate: 0
+  })
+  const [recentAssets, setRecentAssets] = useState<RecentAsset[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (account) {
-      fetchData()
+      loadDashboardData()
+    } else {
+      setLoading(false)
     }
   }, [account])
 
-  const fetchData = async () => {
+  const loadDashboardData = async () => {
     try {
       setLoading(true)
-      const [entitiesRes, assetsRes] = await Promise.all([
-        axios.get(`/api/entities/owner/${account?.address}`),
-        axios.get(`/api/assets/owner/${account?.address}`)
+      const [assetsRes, entitiesRes] = await Promise.all([
+        axios.get(`/api/assets/owner/${account?.address}`),
+        axios.get(`/api/entities/owner/${account?.address}`)
       ])
-      
-      setEntities(entitiesRes.data.data || [])
-      setAssets(assetsRes.data.data || [])
-    } catch (error: any) {
-      console.error('Error fetching data:', error)
-      toast.error('Failed to fetch data from blockchain')
+
+      const assets = assetsRes.data.data || []
+      const entities = entitiesRes.data.data || []
+
+      setStats({
+        totalAssets: assets.length,
+        totalEntities: entities.length,
+        recentActivity: assets.length + entities.length,
+        growthRate: assets.length > 0 ? 15 : 0
+      })
+
+      const recent = assets.slice(0, 5).map((asset: any) => ({
+        id: asset.data?.objectId || '',
+        name: asset.data?.content?.fields?.name || 'Unknown',
+        state: asset.data?.content?.fields?.current_state || 'CREATED',
+        timestamp: Number(asset.data?.content?.fields?.creation_timestamp_ms || Date.now())
+      }))
+
+      setRecentAssets(recent)
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+      toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)
     }
   }
 
-  const stats = [
-    { 
-      label: 'Total Entities', 
-      value: entities.length, 
-      change: entities.length, 
-      changeLabel: 'New',
-      icon: Users, 
-      color: '#6366f1' 
-    },
-    { 
-      label: 'Active Assets', 
-      value: assets.length, 
-      change: assets.length, 
-      changeLabel: 'Created',
-      icon: Package, 
-      color: '#8b5cf6' 
-    },
-    { 
-      label: 'Total Processes', 
-      value: 0, 
-      change: 0, 
-      changeLabel: 'Applied',
-      icon: Activity, 
-      color: '#ec4899' 
-    },
-    { 
-      label: 'Growth Rate', 
-      value: 100, 
-      change: 100,
-      changeLabel: 'Increase',
-      icon: TrendingUp, 
-      color: '#10b981',
-      isPercentage: true 
-    },
-  ]
-
-  const exportData = entities.map((entity: any) => ({
-    name: entity.data?.content?.fields?.name || 'Unknown',
-    type: entity.data?.content?.fields?.entity_type || 'Unknown',
-    location: entity.data?.content?.fields?.location || 'Unknown',
-    id: entity.data?.objectId || ''
-  }))
-
-  const chartData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    values: [entities.length > 0 ? 2 : 0, entities.length > 0 ? 5 : 0, 3, assets.length, entities.length + assets.length, entities.length * 2]
-  }
-
-  const processChartData = {
-    labels: ['Harvest', 'Process', 'Package', 'Ship'],
-    values: [45, 38, 32, 28],
-    colors: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981']
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: 'spring', stiffness: 100 }
-    }
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await loadDashboardData()
+    setTimeout(() => setRefreshing(false), 500)
+    toast.success('Dashboard refreshed')
   }
 
   if (!account) {
     return (
-      <div className={styles.dashboard}>
+      <div className={styles.page}>
         <div className={styles.container}>
-          <motion.div
-            className={styles.welcomeCard}
+          <motion.div 
+            className={styles.heroSection}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
           >
-            <div className={styles.glowOrb} />
-            <h1 className={styles.welcomeTitle}>
-              Welcome to <span className={styles.gradient}>SuiNexus</span>
-            </h1>
-            <p className={styles.welcomeSubtitle}>
-              Next-generation supply chain tracking on Sui blockchain
+            <div className={styles.heroIcon}>
+              <Package size={64} />
+            </div>
+            <h1 className={styles.heroTitle}>Welcome to SuiNexus</h1>
+            <p className={styles.heroSubtitle}>
+              Blockchain-powered supply chain tracking and traceability platform
             </p>
             <p className={styles.connectPrompt}>
               Connect your wallet to get started
             </p>
-            <div className={styles.features}>
-              <div className={styles.feature}>
-                <Package className={styles.featureIcon} />
-                <span>Track Assets</span>
-              </div>
-              <div className={styles.feature}>
-                <Users className={styles.featureIcon} />
-                <span>Manage Entities</span>
-              </div>
-              <div className={styles.feature}>
-                <Activity className={styles.featureIcon} />
-                <span>Monitor Processes</span>
-              </div>
-            </div>
           </motion.div>
         </div>
       </div>
     )
   }
 
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <Loading text="Loading dashboard..." />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={styles.dashboard}>
+    <div className={styles.page}>
       <div className={styles.container}>
         <motion.div
           className={styles.header}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           <div>
             <h1 className={styles.title}>Dashboard</h1>
             <p className={styles.subtitle}>
-              Track and manage your supply chain operations
+              Overview of your supply chain operations
             </p>
           </div>
-          <div className={styles.headerActions}>
-            <ExportCSV data={exportData} filename="entities-report" />
-            <button className={styles.qrButton} onClick={() => setShowQR(!showQR)}>
-              <Package size={18} />
-              {showQR ? 'Hide QR' : 'Generate QR'}
-            </button>
-          </div>
-        </motion.div>
-
-        {showQR && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className={styles.qrSection}
+          <button 
+            className={styles.refreshButton} 
+            onClick={handleRefresh}
+            disabled={refreshing}
           >
-            <QRCodeGenerator 
-              data={`https://suinexus.app/asset/${account.address.slice(0, 10)}`}
-              filename="suinexus-asset"
-            />
-          </motion.div>
-        )}
-
-        <motion.div
-          className={styles.statsGrid}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon
-            return (
-              <motion.div
-                key={index}
-                className={styles.statCard}
-                variants={itemVariants}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              >
-                <div className={styles.statIcon} style={{ background: `linear-gradient(135deg, ${stat.color}20, ${stat.color}10)` }}>
-                  <Icon size={24} color={stat.color} />
-                </div>
-                <div className={styles.statContent}>
-                  <p className={styles.statLabel}>{stat.label}</p>
-                  <div className={styles.statValueRow}>
-                    <h2 className={styles.statValue}>
-                      <AnimatedNumber 
-                        value={stat.value}
-                        duration={2000}
-                        suffix={stat.isPercentage ? '%' : ''}
-                        enableGlow={false}
-                      />
-                    </h2>
-                    <motion.span 
-                      className={styles.statChange}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + (index * 0.1) }}
-                    >
-                      +<AnimatedNumber 
-                        value={stat.change}
-                        duration={2000}
-                        suffix={stat.isPercentage ? '%' : ''}
-                      /> {stat.changeLabel}
-                    </motion.span>
-                  </div>
-                </div>
-                <div className={styles.statGlow} style={{ background: `radial-gradient(circle, ${stat.color}40, transparent)` }} />
-              </motion.div>
-            )
-          })}
+            <RefreshCw size={18} className={refreshing ? styles.spinning : ''} />
+            Refresh
+          </button>
         </motion.div>
 
-        <motion.div
-          className={styles.analyticsSection}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className={styles.sectionHeader}>
-            <BarChart3 size={24} />
-            <h2 className={styles.sectionTitle}>Analytics</h2>
-          </div>
-          <div className={styles.chartsGrid}>
-            <AnalyticsChart 
-              data={chartData} 
-              type="line" 
-              title="Assets Created Over Time" 
-            />
-            <AnalyticsChart 
-              data={processChartData} 
-              type="bar" 
-              title="Process Distribution" 
-            />
-          </div>
-        </motion.div>
-
-        <motion.div
-          className={styles.entitiesSection}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className={styles.sectionHeader}>
-            <Users size={24} />
-            <h2 className={styles.sectionTitle}>Your Entities</h2>
-          </div>
-          
-          <SearchFilter
-            onSearch={(query) => console.log('Search:', query)}
-            onFilter={(filters) => console.log('Filters:', filters)}
-            filterOptions={{
-              type: [
-                { label: 'Farmer', value: 'farmer' },
-                { label: 'Processor', value: 'processor' },
-                { label: 'Distributor', value: 'distributor' },
-                { label: 'Retailer', value: 'retailer' }
-              ]
-            }}
-            placeholder="Search entities..."
+        <div className={styles.statsGrid}>
+          <StatCard
+            icon={Package}
+            label="Total Assets"
+            value={stats.totalAssets}
+            color="#6366f1"
+            delay={0.1}
           />
+          <StatCard
+            icon={Users}
+            label="Total Entities"
+            value={stats.totalEntities}
+            color="#8b5cf6"
+            delay={0.2}
+          />
+          <StatCard
+            icon={Activity}
+            label="Recent Activity"
+            value={stats.recentActivity}
+            color="#ec4899"
+            delay={0.3}
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="Growth Rate"
+            value={stats.growthRate}
+            suffix="%"
+            color="#10b981"
+            delay={0.4}
+          />
+        </div>
 
-          {loading ? (
-            <div className={styles.entitiesList}>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
+        <div className={styles.contentGrid}>
+          <motion.div
+            className={styles.section}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className={styles.sectionHeader}>
+              <h2>Quick Actions</h2>
             </div>
-          ) : entities.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Users size={48} color="rgba(255,255,255,0.3)" />
-              <p>No entities found. Create your first entity!</p>
+            <div className={styles.actionsGrid}>
+              <ActionCard
+                title="Create Entity"
+                description="Register a new entity in the supply chain"
+                link="/create-entity"
+                icon={Users}
+                color="#6366f1"
+              />
+              <ActionCard
+                title="Create Harvest"
+                description="Record a new harvest batch"
+                link="/create-harvest"
+                icon={Package}
+                color="#8b5cf6"
+              />
+              <ActionCard
+                title="Transfer Asset"
+                description="Transfer asset to another entity"
+                link="/transfer"
+                icon={Send}
+                color="#f59e0b"
+              />
+              <ActionCard
+                title="Apply Process"
+                description="Apply processing to assets"
+                link="/process"
+                icon={Settings}
+                color="#ec4899"
+              />
             </div>
-          ) : (
-            <div className={styles.entitiesList}>
-              {entities.map((entity: any, index: number) => {
-                const fields = entity.data?.content?.fields || {}
-                return (
+          </motion.div>
+
+          <motion.div
+            className={styles.section}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className={styles.sectionHeader}>
+              <h2>Recent Assets</h2>
+              <button onClick={() => navigate('/tracking')} className={styles.viewAllButton}>
+                View All
+                <ArrowRight size={16} />
+              </button>
+            </div>
+            {recentAssets.length === 0 ? (
+              <div className={styles.emptyState}>
+                <Package size={48} />
+                <p>No assets yet</p>
+                <button onClick={() => navigate('/create-harvest')} className={styles.createButton}>
+                  <Plus size={18} />
+                  Create First Asset
+                </button>
+              </div>
+            ) : (
+              <div className={styles.assetsList}>
+                {recentAssets.map((asset, index) => (
                   <motion.div
-                    key={entity.data?.objectId || index}
-                    className={styles.entityCard}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    key={asset.id}
+                    className={styles.assetItem}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    whileHover={{ x: 5 }}
+                    onClick={() => navigate(`/asset/${asset.id}`)}
                   >
-                    <div className={styles.entityIcon}>
-                      <Users size={20} />
+                    <div className={styles.assetIcon}>
+                      <Package size={20} />
                     </div>
-                    <div className={styles.entityInfo}>
-                      <h3>{fields.name || 'Unknown Entity'}</h3>
-                      <p>{fields.location || 'Unknown Location'}</p>
-                    </div>
-                    <div className={styles.entityStats}>
-                      <span className={styles.entityType}>{fields.entity_type || 'Unknown'}</span>
-                      <span className={`${styles.entityStatus} ${styles.active}`}>
-                        Active
+                    <div className={styles.assetInfo}>
+                      <h4>{asset.name}</h4>
+                      <span className={`${styles.stateBadge} ${styles[asset.state.toLowerCase()]}`}>
+                        {asset.state}
                       </span>
                     </div>
+                    <ArrowRight size={18} className={styles.assetArrow} />
                   </motion.div>
-                )
-              })}
-            </div>
-          )}
-        </motion.div>
-
-        <motion.div
-          className={styles.quickActions}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h2 className={styles.sectionTitle}>Quick Actions</h2>
-          <div className={styles.actionsGrid}>
-            <ActionCard
-              title="Create Entity"
-              description="Register a new entity in the supply chain"
-              icon={Users}
-              color="#6366f1"
-              link="/create-entity"
-            />
-            <ActionCard
-              title="Create Harvest"
-              description="Record a new harvest batch"
-              icon={Package}
-              color="#8b5cf6"
-              link="/create-harvest"
-            />
-            <ActionCard
-              title="Track Assets"
-              description="View and monitor your assets"
-              icon={Activity}
-              color="#ec4899"
-              link="/tracking"
-            />
-          </div>
-        </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </div>
   )
 }
 
-const ActionCard = ({ title, description, icon: Icon, color, link }: any) => {
+interface StatCardProps {
+  icon: any
+  label: string
+  value: number
+  suffix?: string
+  color: string
+  delay: number
+}
+
+const StatCard = ({ icon: Icon, label, value, suffix = '', color, delay }: StatCardProps) => {
   return (
-    <motion.a
-      href={link}
+    <motion.div
+      className={styles.statCard}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay }}
+      whileHover={{ y: -5 }}
+    >
+      <div className={styles.statIcon} style={{ background: `${color}20` }}>
+        <Icon size={28} color={color} />
+      </div>
+      <div className={styles.statContent}>
+        <p className={styles.statLabel}>{label}</p>
+        <h3 className={styles.statValue}>
+          <AnimatedNumber value={value} suffix={suffix} />
+        </h3>
+      </div>
+    </motion.div>
+  )
+}
+
+interface ActionCardProps {
+  title: string
+  description: string
+  link: string
+  icon: any
+  color: string
+}
+
+const ActionCard = ({ title, description, link, icon: Icon, color }: ActionCardProps) => {
+  const navigate = useNavigate()
+
+  return (
+    <motion.div
       className={styles.actionCard}
-      whileHover={{ scale: 1.02 }}
+      onClick={() => navigate(link)}
+      whileHover={{ scale: 1.02, y: -5 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className={styles.actionIcon} style={{ color }}>
-        <Icon size={28} />
+      <div className={styles.actionIcon} style={{ background: `${color}20` }}>
+        <Icon size={24} color={color} />
       </div>
-      <h3 className={styles.actionTitle}>{title}</h3>
-      <p className={styles.actionDescription}>{description}</p>
-      <div className={styles.actionArrow}>→</div>
-    </motion.a>
+      <div className={styles.actionContent}>
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+      <ArrowRight size={18} className={styles.actionArrow} />
+    </motion.div>
   )
 }
 

@@ -7,12 +7,14 @@ import {
   Clock, 
   TrendingUp,
   Activity,
+  QrCode,
   type LucideIcon 
 } from 'lucide-react';
 import axios from 'axios';
 import styles from './AssetDetail.module.css';
 import Timeline, { type TimelineEvent } from '../../components/TimeLine/TimeLine';
 import LocationMap, { type MapLocation } from '../../components/LocationMap/LocationMap';
+import QRCodeDisplay from '../../components/QRCodeDisplay/QRCodeDisplay';
 import { useToast } from '../../components/Toast/ToastProvider';
 import Loading from '../../components/Loading/Loading';
 
@@ -41,12 +43,12 @@ const AssetDetail = () => {
   const toast = useToast();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadAssetDetails();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadAssetDetails = async () => {
@@ -167,7 +169,30 @@ const AssetDetail = () => {
               <span>ID: {id?.slice(0, 16)}...{id?.slice(-8)}</span>
             </div>
           </div>
+          <button 
+            className={styles.qrButton}
+            onClick={() => setShowQR(!showQR)}
+            title="Show QR Code"
+          >
+            <QrCode size={24} />
+          </button>
         </motion.div>
+
+        {showQR && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className={styles.qrSection}
+          >
+            <QRCodeDisplay
+              data={id || ''}
+              title="Asset QR Code"
+              subtitle="Scan to view asset details"
+              size={300}
+            />
+          </motion.div>
+        )}
 
         <div className={styles.infoGrid}>
           <InfoCard

@@ -21,6 +21,7 @@
     "deploy:contract": "cd packages/contract && sui client publish --gas-budget 100000000"
   },
   "devDependencies": {
+    "@vercel/node": "^5.3.24",
     "concurrently": "^8.2.2"
   },
   "engines": {
@@ -44,5 +45,8 @@
   "bugs": {
     "url": "https://github.com/yourusername/suinexus/issues"
   },
-  "homepage": "https://github.com/yourusername/suinexus#readme"
+  "homepage": "https://github.com/yourusername/suinexus#readme",
+  "dependencies": {
+    "@mysten/sui": "^1.39.0"
+  }
 }

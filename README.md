@@ -1,8 +1,10 @@
 SuiNexus: Platform Pelacakan Rantai Pasok Berbasis Blockchain
-SuiNexus adalah sebuah platform terdesentralisasi yang dirancang untuk meningkatkan transparansi, keterlacakan, dan efisiensi dalam manajemen rantai pasok. Dengan memanfaatkan teknologi blockchain Sui, platform ini merepresentasikan aset fisik sebagai Non-Fungible Tokens (NFTs), memungkinkan pencatatan setiap langkah dalam siklus hidup produk secara immutable (tidak dapat diubah).
+SuiNexus adalah sebuah platform terdesentralisasi yang dirancang untuk meningkatkan transparansi, keterlacakan, dan efisiensi dalam manajemen rantai pasok. Dengan memanfaatkan arsitektur objek-sentris dari blockchain Sui, platform ini merepresentasikan aset fisik sebagai Non-Fungible Tokens (NFTs), memungkinkan pencatatan setiap langkah dalam siklus hidup produk secara immutable (tidak dapat diubah) dan dapat diverifikasi.
 
 Abstrak
-Manajemen rantai pasok tradisional sering kali terfragmentasi, tidak efisien, dan kurang transparan, yang mengakibatkan kesulitan dalam melacak asal-usul produk, memverifikasi keaslian, dan mengidentifikasi titik kegagalan. SuiNexus mengatasi tantangan ini dengan menyediakan satu sumber kebenaran (single source of truth) yang terdistribusi. Setiap entitas dalam rantai pasok—mulai dari petani, pemroses, hingga distributor—dapat berinteraksi dengan aset digital yang merepresentasikan produk fisik, mencatat setiap transaksi dan transformasi pada ledger blockchain yang aman dan dapat diaudit.
+Manajemen rantai pasok tradisional sering kali terfragmentasi, tidak efisien, dan kurang transparan, yang mengakibatkan kesulitan dalam melacak asal-usul produk, memverifikasi keaslian, dan mengidentifikasi titik kegagalan. SuiNexus mengatasi tantangan ini dengan menyediakan satu sumber kebenaran (single source of truth) yang terdistribusi dan dapat diaudit oleh semua pemangku kepentingan.
+
+Setiap entitas dalam rantai pasok—mulai dari petani, pemroses, hingga distributor—dapat berinteraksi dengan aset digital yang merepresentasikan produk fisik. Setiap transaksi dan transformasi dicatat pada ledger blockchain yang aman, menciptakan jejak digital yang tidak dapat diubah dari hulu ke hilir.
 
 Fitur Utama
 Fungsionalitas Inti
@@ -12,7 +14,7 @@ Manajemen Entitas: Pendaftaran dan pengelolaan identitas digital untuk semua pem
 
 Pelacakan Aset Komprehensif: Pemantauan pergerakan dan status aset secara real-time melalui antarmuka pengguna atau dengan memindai kode QR yang tertaut pada aset fisik.
 
-Pencatatan Proses: Kemampuan untuk mencatat setiap proses transformasi yang diterapkan pada aset, seperti pemrosesan, pengemasan, atau kontrol kualitas, dengan dukungan bukti media (foto/video).
+Pencatatan Proses: Kemampuan untuk mencatat setiap proses transformasi yang diterapkan pada aset—seperti pemrosesan, pengemasan, atau kontrol kualitas—dengan dukungan bukti media (foto/video).
 
 Transfer dan Faktur Otomatis: Transfer kepemilikan aset antar entitas yang disertai dengan pembuatan faktur (invoice) digital secara otomatis dalam bentuk NFT.
 
@@ -30,7 +32,7 @@ Dukungan Offline (PWA): Dirancang sebagai Progressive Web App (PWA) dengan kapab
 Ekspor Data: Fungsionalitas untuk mengekspor data analitik dan riwayat aset ke format standar seperti PDF.
 
 Arsitektur Sistem
-SuiNexus mengadopsi arsitektur monorepo yang terdiri dari tiga komponen utama:
+SuiNexus mengadopsi arsitektur monorepo yang dikelola dengan npm/pnpm workspaces, memisahkan komponen-komponen logis ke dalam paket-paket independen.
 
 suinexus/
 ├── packages/
@@ -38,40 +40,20 @@ suinexus/
 │   ├── frontend/         # Aplikasi Klien (React/Vite)
 │   └── contracts/        # Smart Contracts (Sui Move)
 └── ...
-Smart Contracts (packages/contracts):
+Komponen	Teknologi	Deskripsi
+Smart Contracts	Sui Move	Inti dari logika bisnis terdesentralisasi. Mendefinisikan struktur data untuk Aset (DynamicAssetNFT), Entitas (EntityObject), dan Faktur (InvoiceNFT), serta fungsi untuk berinteraksi dengannya.
+Backend	Node.js, Express	Berfungsi sebagai lapisan perantara antara klien dan blockchain Sui. Menyediakan API RESTful untuk kueri data yang kompleks dan agregasi.
+Frontend	React, TypeScript, Vite	Antarmuka pengguna yang memungkinkan interaksi dengan smart contract melalui dompet digital dan menyajikan data rantai pasok dalam format yang mudah dipahami.
 
-Ditulis dalam bahasa Sui Move, komponen ini adalah inti dari logika bisnis terdesentralisasi.
-
-Mendefinisikan struktur data untuk Aset (DynamicAssetNFT), Entitas (EntityObject), dan Faktur (InvoiceNFT).
-
-Menyediakan fungsi publik untuk menciptakan, mentransfer, dan memodifikasi status aset pada blockchain.
-
-Backend (packages/backend):
-
-Berfungsi sebagai lapisan perantara antara klien dan blockchain Sui.
-
-Menyediakan endpoint API RESTful untuk mengambil data terstruktur dari blockchain (misalnya, mengambil semua aset yang dimiliki oleh alamat tertentu).
-
-Menangani tugas-tugas seperti validasi, caching, dan agregasi data untuk mengurangi beban pada sisi klien.
-
-Frontend (packages/frontend):
-
-Dibangun dengan React, TypeScript, dan Vite sebagai antarmuka pengguna.
-
-Memungkinkan pengguna berinteraksi dengan smart contract melalui dompet digital mereka.
-
-Menyajikan data rantai pasok yang kompleks dalam bentuk dasbor, linimasa, dan peta yang mudah dipahami.
-
-Mengimplementasikan fungsionalitas PWA untuk pengalaman pengguna yang andal.
-
+Export to Sheets
 Prasyarat
-Node.js v18 atau lebih tinggi
+Node.js: Versi 18 atau lebih tinggi.
 
-Manajer paket: npm, yarn, atau pnpm
+Manajer Paket: npm, yarn, atau pnpm.
 
-Ekstensi peramban Sui Wallet
+Sui Wallet: Ekstensi peramban untuk interaksi dengan dApp.
 
-Sui CLI (untuk deployment smart contract)
+Sui CLI: Diperlukan untuk kompilasi dan deployment smart contract.
 
 Panduan Instalasi dan Menjalankan
 1. Kloning Repositori
@@ -105,12 +87,15 @@ VITE_API_BASE_URL=http://localhost:3001/api
 VITE_PACKAGE_ID=0x...
 VITE_MODULE_NAME=nexus
 VITE_SUI_NETWORK=devnet
-*Catatan: PACKAGE_ID harus diisi dengan ID yang didapat setelah men-deploy smart contract.
+Penting: PACKAGE_ID harus diisi dengan ID yang didapat setelah men-deploy smart contract.
 
 4. Deployment Smart Contract
 Bash
 
+# Arahkan ke direktori kontrak
 cd packages/contracts
+
+# Deploy ke jaringan yang diinginkan (contoh: devnet)
 sui client publish --gas-budget 100000000
 Salin Package ID dari hasil output dan masukkan ke dalam file .env backend dan frontend.
 
@@ -124,19 +109,6 @@ Backend akan berjalan di http://localhost:3001.
 
 Frontend akan berjalan di http://localhost:5173.
 
-Panduan Pengujian
-Untuk menjalankan pengujian unit dan integrasi untuk setiap paket, gunakan perintah berikut dari direktori root:
-
-Bash
-
-# Menjalankan pengujian untuk semua workspace
-npm run test
-
-# Menjalankan pengujian spesifik untuk backend
-npm run test --workspace=backend
-
-# Menjalankan pengujian spesifik untuk frontend
-npm run test --workspace=frontend
 Deployment Produksi
 Backend
 Aplikasi backend dapat di-build dan dijalankan sebagai proses Node.js standar. Disarankan untuk men-deploy-nya sebagai kontainer Docker di platform seperti Railway, Render, atau layanan cloud lainnya.
@@ -145,13 +117,13 @@ Frontend
 Aplikasi frontend adalah aplikasi web statis. Setelah proses build, hasilnya (di dalam direktori dist) dapat di-deploy di platform hosting statis seperti Vercel atau Netlify.
 
 Smart Contract
-Untuk men-deploy ke jaringan utama Sui:
+Untuk men-deploy ke jaringan utama Sui, gunakan flag --network mainnet:
 
 Bash
 
 sui client publish --gas-budget 100000000 --network mainnet
 Kontribusi
-Kontribusi pada proyek ini sangat dihargai. Silakan buat fork dari repositori ini, buat branch fitur baru, dan kirimkan pull request untuk ditinjau.
+Kontribusi pada proyek ini sangat dihargai. Silakan buat fork dari repositori ini, buat branch fitur baru (git checkout -b feature/NamaFitur), dan kirimkan pull request untuk ditinjau.
 
 Lisensi
 Proyek ini dilisensikan di bawah Lisensi MIT.

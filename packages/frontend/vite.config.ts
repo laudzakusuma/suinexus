@@ -26,7 +26,7 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     target: 'esnext',
-    minify: 'terser',
+    minify: 'esbuild',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true

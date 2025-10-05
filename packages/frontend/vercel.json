@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "framework": "vite",
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "rewrites": [
-    {
-      "source": "/((?!api/|assets/|.*\\.(js|css|png|jpg|svg|json|ico|woff|woff2|ttf|eot)).*)",
-      "destination": "/index.html"
-    }
-  ],
+  "installCommand": "pnpm install",
+  "framework": "vite",
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -21,7 +15,7 @@
       ]
     },
     {
-      "source": "/(.*)\\.js",
+      "source": "/(.*).js",
       "headers": [
         {
           "key": "Content-Type",
@@ -30,7 +24,7 @@
       ]
     },
     {
-      "source": "/(.*)\\.mjs",
+      "source": "/(.*).mjs",
       "headers": [
         {
           "key": "Content-Type",
@@ -39,22 +33,19 @@
       ]
     },
     {
-      "source": "/(.*)\\.css",
+      "source": "/(.*).css",
       "headers": [
         {
           "key": "Content-Type",
           "value": "text/css; charset=utf-8"
         }
       ]
-    },
+    }
+  ],
+  "rewrites": [
     {
-      "source": "/manifest.json",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json; charset=utf-8"
-        }
-      ]
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }

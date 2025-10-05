@@ -36,7 +36,8 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'chart-vendor': ['recharts'],
-          'ui-vendor': ['framer-motion', 'lucide-react']
+          'ui-vendor': ['framer-motion', 'lucide-react'],
+          'sui-vendor': ['@mysten/dapp-kit', '@mysten/sui'] // ✅ Tambahkan ini
         }
       }
     }
@@ -46,8 +47,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:3001', // ✅ Gunakan env variable
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api') // ✅ Ensure path tidak berubah
       }
     }
   }

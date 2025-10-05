@@ -1,14 +1,24 @@
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const network = process.env.SUI_NETWORK || 'devnet';
-const rpcUrl = getFullnodeUrl(network as 'devnet' | 'testnet' | 'mainnet');
+const network = (process.env.SUI_NETWORK || 'devnet') as 'devnet' | 'testnet' | 'mainnet';
+const rpcUrl = getFullnodeUrl(network);
 const suiClient = new SuiClient({ url: rpcUrl });
 
 export default async function handler(
   request: VercelRequest,
   response: VercelResponse,
 ) {
+  // Enable CORS
+  response.setHeader('Access-Control-Allow-Credentials', 'true');
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (request.method === 'OPTIONS') {
+    return response.status(200).end();
+  }
+
   const { address } = request.query;
 
   if (typeof address !== 'string' || address.length < 60) {
@@ -24,9 +34,12 @@ export default async function handler(
       options: {
         showContent: true,
         showType: true,
+        showDisplay: true,
+        showOwner: true
       }
     });
 
+    // Filter untuk EntityObject
     const entities = objects.data.filter((obj: any) => {
       const type = obj.data?.type || '';
       return type.includes('EntityObject');

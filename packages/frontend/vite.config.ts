@@ -6,18 +6,23 @@ export default defineConfig({
   base: '/',
   
   resolve: {
-    dedupe: ['react', 'react-dom']
+    dedupe: ['react', 'react-dom'],
   },
 
   optimizeDeps: {
     include: [
       'react', 
       'react-dom', 
-      '@mysten/dapp-kit',
-      '@mysten/sui'
+      '@mysten/dapp-kit'
     ],
+    // ✅ KUNCI: Exclude @mysten/sui dari optimizeDeps
+    exclude: ['@mysten/sui'],
     esbuildOptions: {
-      target: 'esnext'
+      target: 'esnext',
+      supported: {
+        // ✅ Support untuk top-level await
+        'top-level-await': true
+      }
     }
   },
 
@@ -29,15 +34,27 @@ export default defineConfig({
     minify: 'esbuild',
     commonjsOptions: {
       include: [/node_modules/],
-      transformMixedEsModules: true
+      transformMixedEsModules: true,
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'chart-vendor': ['recharts'],
-          'ui-vendor': ['framer-motion', 'lucide-react'],
-          'sui-vendor': ['@mysten/dapp-kit', '@mysten/sui'] // ✅ Tambahkan ini
+        manualChunks: (id) => {
+          // ✅ Custom chunking logic
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('recharts')) {
+              return 'chart-vendor';
+            }
+            if (id.includes('framer-motion') || id.includes('lucide-react')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('@mysten')) {
+              return 'mysten-vendor'; // ✅ Pisahkan Mysten packages
+            }
+            return 'vendor';
+          }
         }
       }
     }
@@ -47,9 +64,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:3001', // ✅ Gunakan env variable
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api') // ✅ Ensure path tidak berubah
+        target: 'http://localhost:3001',
+        changeOrigin: true
       }
     }
   }

@@ -27,14 +27,8 @@ flavor = "sui"
 
 [env]
 
-[env.suinexus]
-chain-id = "bc718b80"
-original-published-id = "0x67a94406c0c1c38473ed22ea9a76f40f6ccc00e9736b4e4de351411cc05de398"
-latest-published-id = "0x67a94406c0c1c38473ed22ea9a76f40f6ccc00e9736b4e4de351411cc05de398"
-published-version = "1"
-
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x132efab4481609cdaeaeaddfbf9f8cb062bfa219e89a0327d065b8157ecac87b"
-latest-published-id = "0x132efab4481609cdaeaeaddfbf9f8cb062bfa219e89a0327d065b8157ecac87b"
+original-published-id = "0x952dd7a78b467cf5e23307ec3a48ef3e7ab9eaface035d24d7f0a08790e923ea"
+latest-published-id = "0x952dd7a78b467cf5e23307ec3a48ef3e7ab9eaface035d24d7f0a08790e923ea"
 published-version = "1"

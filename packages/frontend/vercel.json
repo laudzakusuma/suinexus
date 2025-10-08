@@ -7,9 +7,9 @@
   
   "env": {
     "SUI_NETWORK": "devnet",
-    "VITE_PACKAGE_ID": "0x132efab4481609cdaeaeaddfbf9f8cb062bfa219e89a0327d065b8157ecac87b",
+    "VITE_PACKAGE_ID": "0x952dd7a78b467cf5e23307ec3a48ef3e7ab9eaface035d24d7f0a08790e923ea",
     "VITE_MODULE_NAME": "nexus",
-    "VITE_SUI_NETWORK": "devnet"
+    "VITE_SUI_NETWORK": "testnet"
   },
   
   "headers": [

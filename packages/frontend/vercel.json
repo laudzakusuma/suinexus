@@ -5,13 +5,6 @@
   "installCommand": "pnpm install",
   "framework": "vite",
   
-  "env": {
-    "SUI_NETWORK": "devnet",
-    "VITE_PACKAGE_ID": "0x88edc9f2c8b328d930f35ae6553ba9ea64f9d4e93afd42d699038ea887633182",
-    "VITE_MODULE_NAME": "nexus",
-    "VITE_SUI_NETWORK": "devnet"
-  },
-  
   "headers": [
     {
       "source": "/api/(.*)",

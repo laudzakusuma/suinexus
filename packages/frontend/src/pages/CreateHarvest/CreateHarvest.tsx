@@ -21,6 +21,8 @@ const CreateHarvest = () => {
   })
   const [loading, setLoading] = useState(false)
 
+  const packageIdFromEnv = import.meta.env.VITE_PACKAGE_ID;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -119,6 +121,18 @@ const CreateHarvest = () => {
           <h1 className={styles.title}>Create Harvest Batch</h1>
           <p className={styles.subtitle}>Record a new harvest batch in the supply chain</p>
         </motion.div>
+
+        <div style={{ 
+          color: 'yellow', 
+          backgroundColor: 'rgba(255, 255, 0, 0.1)',
+          padding: '10px',
+          borderRadius: '8px',
+          marginBottom: '20px', 
+          wordBreak: 'break-all',
+          border: '1px solid yellow'
+        }}>
+          DEBUG: VITE_PACKAGE_ID yang digunakan adalah: {packageIdFromEnv || " TIDAK DITEMUKAN"}
+        </div>
 
         <motion.form 
           className={styles.form} 

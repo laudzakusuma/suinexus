@@ -17,6 +17,8 @@ import styles from './App.module.css'
 function App() {
   const location = useLocation()
 
+  console.log("Package ID:", import.meta.env.VITE_PACKAGE_ID);
+
   return (
     <div className={styles.app}>
       <VideoBackground />

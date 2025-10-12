@@ -1,7 +1,6 @@
 # SuiNexus: Platform Pelacakan Rantai Pasok Berbasis Blockchain
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![U2U Network](https://img.shields.io/badge/Network-U2U%20Testnet-blue)](https://u2u.xyz)
 [![Built for BI-OJK Hackathon](https://img.shields.io/badge/Built%20for-BI--OJK%20Hackathon-green)](https://GANTI_DENGAN_URL_HACKATHON)
 
 > **SuiNexus** adalah sebuah platform terdesentralisasi yang dirancang untuk meningkatkan transparansi, keterlacakan, dan efisiensi dalam manajemen rantai pasok. Dengan memanfaatkan arsitektur objek-sentris dari blockchain Sui, platform ini merepresentasikan aset fisik sebagai *Non-Fungible Tokens* (NFTs), memungkinkan pencatatan setiap langkah dalam siklus hidup produk secara *immutable* (tidak dapat diubah) dan dapat diverifikasi.
